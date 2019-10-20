@@ -9,8 +9,16 @@
     <Grid RenderTransformOrigin="0.732,0.509">
         <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Text="Load Image to show Exif info" TextWrapping="Wrap" VerticalAlignment="Top" Height="27" Width="232" Cursor="Arrow"/>
         <Button Content="Browse" HorizontalAlignment="Left" Margin="242,10,0,0" VerticalAlignment="Top" Click="Button_Click_1"/>
-        <ScrollViewer Margin="10,42,292,82">
-            <TextBlock Name="ImageMetadataBox" Text="{Binding Path=TextBlockContent}" TextWrapping="Wrap" Width="483" Foreground="Black"/>
+        <ScrollViewer Margin="10,42,439,82">
+            <TextBlock Name="ImageMetadataBox" Text="{Binding Path=TextBlockContent}" TextWrapping="Wrap" Width="351" Foreground="Black"/>
         </ScrollViewer>
+        <Grid HorizontalAlignment="Left" Height="416" Margin="400,8,0,0" VerticalAlignment="Top" Width="390">
+            <TextBlock Height="27" Text="Load Polarsteps directory" TextWrapping="Wrap" Width="138" VerticalAlignment="Top" Margin="0,2,0,0" HorizontalAlignment="Left"/>
+            <Button Content="{Binding PolarstepsButtonContent}" Click="Button_Click_Polarsteps_Dir" Height="23" Width="182" VerticalAlignment="Top" Margin="163,0,0,0" HorizontalAlignment="Left"/>
+            <ComboBox ItemsSource="{Binding PolarstepsCBItems}" SelectedItem="{Binding PolarstepsCBSelectedItem}" Width="182" IsEnabled="{Binding PolarstepsCBIsEnabled}" VerticalAlignment="Top" Margin="163,34,0,0" HorizontalAlignment="Left"/>
+            <TextBlock Text="Select trip to process" TextWrapping="Wrap" Width="138" IsEnabled="{Binding PolarstepsCBIsEnabled}" VerticalAlignment="Top" Margin="0,40,0,0" HorizontalAlignment="Left"/>
+            <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsValidDirectory}" VerticalAlignment="Top" Margin="138,3,0,0" HorizontalAlignment="Left"/>
+            <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsTripSelected}" VerticalAlignment="Top" Margin="138,38,0,0" HorizontalAlignment="Left"/>
+        </Grid>
     </Grid>
 </Window>

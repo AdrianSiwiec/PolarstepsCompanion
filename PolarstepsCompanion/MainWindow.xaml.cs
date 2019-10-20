@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -29,6 +30,7 @@ namespace PolarstepsCompanion
         {
             InitializeComponent();
             this.DataContext = this;
+            this.PolarstepsCBItems = new ObservableCollection<ComboBoxItem>();
         }
 
         private string textBlockContent = "Empty so far...";
@@ -42,9 +44,47 @@ namespace PolarstepsCompanion
             }
         }
 
+        private string polarstepsButtonContent = "Browse...";
+        public string PolarstepsButtonContent
+        {
+            get { return polarstepsButtonContent; }
+            set
+            {
+                polarstepsButtonContent = value;
+                RaisePropertyChanged("PolarstepsButtonContent");
+            }
+        }
+        private bool polarstepsIsValidDirectory = false;
+        public bool PolarstepsIsValidDirectory
+        {
+            get { return polarstepsIsValidDirectory; }
+            set
+            {
+                polarstepsIsValidDirectory = value;
+                RaisePropertyChanged("PolarstepsIsValidDirectory");
+            }
+
+        }
+        // Polarsteps Trips CB
+        public ObservableCollection<ComboBoxItem> PolarstepsCBItems { get; set; }
+        public ComboBoxItem PolarstepsCBSelectedItem { get; set; }
+        private bool polarstepsCbIsEnabled = false;
+        public bool PolarstepsCBIsEnabled
+        {
+            get { return polarstepsCbIsEnabled; }
+            set
+            {
+                polarstepsCbIsEnabled = value;
+                RaisePropertyChanged("PolarstepsCBIsEnabled");
+            }
+        }
+
+
+        private PolarstepsProcessor polarstepsProcessor;
+
         private void RaisePropertyChanged(string propName)
         {
-            if(PropertyChanged != null)
+            if (PropertyChanged != null)
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propName));
             }
@@ -63,9 +103,9 @@ namespace PolarstepsCompanion
                 IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(fileDialog.FileName);
 
                 TextBlockContent = "";
-                foreach(Directory directory in directories)
+                foreach (Directory directory in directories)
                 {
-                    foreach(Tag tag in directory.Tags)
+                    foreach (Tag tag in directory.Tags)
                     {
                         TextBlockContent += tag.ToString();
                         TextBlockContent += "\n";
@@ -83,6 +123,33 @@ namespace PolarstepsCompanion
             //{
             //    Trace.WriteLine(common.FileName);
             //}
+        }
+
+
+
+        private void Button_Click_Polarsteps_Dir(object sender, RoutedEventArgs e)
+        {
+            CommonOpenFileDialog fileDialog = new CommonOpenFileDialog();
+            fileDialog.IsFolderPicker = true;
+            if (fileDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                polarstepsProcessor = new PolarstepsProcessor(fileDialog.FileName);
+
+                if (!polarstepsProcessor.isValidDirectory)
+                {
+                    PolarstepsIsValidDirectory = false;
+                    return;
+                }
+
+                PolarstepsButtonContent = fileDialog.FileName;
+                PolarstepsIsValidDirectory = true;
+
+                foreach (string trip in polarstepsProcessor.tripNames)
+                {
+                    PolarstepsCBItems.Add(new ComboBoxItem { Content = trip });
+                }
+                PolarstepsCBIsEnabled = true;
+            }
         }
     }
 }
