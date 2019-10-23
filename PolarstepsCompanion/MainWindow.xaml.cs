@@ -6,13 +6,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -43,38 +42,6 @@ namespace PolarstepsCompanion
                 photosPath = value;
                 RaisePropertyChanged("PhotosPath");
             }
-        }
-
-        class ImagePreviewClass
-        {
-            private string imagePreviewFilename;
-            private Image imagePreviewThumbnail;
-            private string imagePreviewPath;
-            private Uri imagePreviewUri;
-
-            public ImagePreviewClass(string path)
-            {
-                this.ImagePreviewFilename = path;
-                this.ImagePreviewPath = path;
-
-                this.ImagePreviewThumbnail = new Image();
-                ImagePreviewThumbnail.Width = 100;
-
-                BitmapImage bitmap = new BitmapImage();
-                bitmap.BeginInit();
-                bitmap.UriSource = new Uri(path);
-                bitmap.DecodePixelWidth = 100;
-                bitmap.EndInit();
-
-                this.ImagePreviewUri = new Uri(path);
-
-                ImagePreviewThumbnail.Source = bitmap;
-            }
-
-            public string ImagePreviewFilename { get => imagePreviewFilename; set => imagePreviewFilename = value; }
-            public string ImagePreviewPath { get => imagePreviewPath; set => imagePreviewPath = value; }
-            public Image ImagePreviewThumbnail { get => imagePreviewThumbnail; set => imagePreviewThumbnail = value; }
-            public Uri ImagePreviewUri { get => imagePreviewUri; set => imagePreviewUri = value; }
         }
 
         private string textBlockContent = "Empty so far...";
@@ -182,19 +149,6 @@ namespace PolarstepsCompanion
             //}
         }
 
-        public class A
-        {
-            public string show;
-            public string have;
-
-            override public string ToString()
-            {
-                return show + " " + have;
-            }
-        }
-
-
-
         private void Button_Click_Polarsteps_Dir(object sender, RoutedEventArgs e)
         {
             using CommonOpenFileDialog fileDialog = new CommonOpenFileDialog
@@ -252,27 +206,25 @@ namespace PolarstepsCompanion
             {
                 PhotosPath = fileDialog.FileName;
 
-                List<ImagePreviewClass> images = new List<ImagePreviewClass>();
-                images.Add(new ImagePreviewClass("C:\\git\\PolarstepsCompanion\\test images\\camera.JPG"));
-                images.Add(new ImagePreviewClass("C:\\git\\PolarstepsCompanion\\test images\\phone.JPG"));
+                ObservableCollection<ImagePreviewClass> images = new ObservableCollection<ImagePreviewClass>();
+
+                var imagePaths = System.IO.Directory.EnumerateFiles(fileDialog.FileName, "*.JPG", System.IO.SearchOption.AllDirectories);
+
+                foreach (string image in imagePaths)
+                {
+                    images.Add(new ImagePreviewClass(fileDialog.FileName, image));
+                }
 
                 ImagePreviewDataGrid.ItemsSource = images;
+
+                PhotosLoadedInfo.Text = $"{images.Count} photos loaded succesfully.";
+                RaisePropertyChanged("PhotosLoadedInfo");
             }
         }
-    }
 
-    public class ImageConverter : IValueConverter
-    {
-        public object Convert(
-            object value, Type targetType, object parameter, CultureInfo culture)
+        private void ImagePreviewDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            return new BitmapImage(new Uri(value.ToString()));
-        }
-
-        public object ConvertBack(
-            object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotSupportedException();
+            ImagePreviewDataGrid.UnselectAllCells();
         }
     }
 }
