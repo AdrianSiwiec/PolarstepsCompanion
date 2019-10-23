@@ -54,6 +54,7 @@ namespace PolarstepsCompanion
                 RaisePropertyChanged("PolarstepsButtonContent");
             }
         }
+
         private bool polarstepsIsValidDirectory = false;
         public bool PolarstepsIsValidDirectory
         {
@@ -64,6 +65,17 @@ namespace PolarstepsCompanion
                 RaisePropertyChanged("PolarstepsIsValidDirectory");
             }
 
+        }
+
+        private bool polarstepsIsTripSelected = false;
+        public bool PolarstepsIsTripSelected
+        {
+            get { return polarstepsIsTripSelected; }
+            set
+            {
+                polarstepsIsTripSelected = value;
+                RaisePropertyChanged("PolarstepsIsTripSelected");
+            }
         }
         // Polarsteps Trips CB
         public ObservableCollection<ComboBoxItem> PolarstepsCBItems { get; set; }
@@ -125,6 +137,17 @@ namespace PolarstepsCompanion
             //}
         }
 
+        public class A
+        {
+            public string show;
+            public string have;
+
+            override public string ToString()
+            {
+                return show + " " + have;
+            }
+        }
+
 
 
         private void Button_Click_Polarsteps_Dir(object sender, RoutedEventArgs e)
@@ -135,7 +158,7 @@ namespace PolarstepsCompanion
             {
                 polarstepsProcessor = new PolarstepsProcessor(fileDialog.FileName);
 
-                if (!polarstepsProcessor.isValidDirectory)
+                if (!polarstepsProcessor.IsValidDirectory)
                 {
                     PolarstepsIsValidDirectory = false;
                     return;
@@ -144,11 +167,29 @@ namespace PolarstepsCompanion
                 PolarstepsButtonContent = fileDialog.FileName;
                 PolarstepsIsValidDirectory = true;
 
-                foreach (string trip in polarstepsProcessor.tripNames)
+                PolarstepsCBItems.Clear();
+                foreach (string trip in polarstepsProcessor.TripNames)
                 {
-                    PolarstepsCBItems.Add(new ComboBoxItem { Content = trip });
+                    PolarstepsCBItems.Add(new ComboBoxItem { Content = new PolarstepsTrip(trip) });
                 }
                 PolarstepsCBIsEnabled = true;
+            }
+        }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count > 0)
+            {
+                polarstepsProcessor.TripSelected(e.AddedItems[0]);
+                PolarstepsIsTripSelected = polarstepsProcessor.SelectedTrip != null;
+            }
+        }
+
+        private void PolarstepsStartProcessing_Click(object sender, RoutedEventArgs e)
+        {
+            if(PolarstepsIsValidDirectory && PolarstepsIsTripSelected)
+            {
+                polarstepsProcessor.Process();
             }
         }
     }

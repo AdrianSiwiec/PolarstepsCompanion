@@ -15,10 +15,11 @@
         <Grid HorizontalAlignment="Left" Height="416" Margin="400,8,0,0" VerticalAlignment="Top" Width="390">
             <TextBlock Height="27" Text="Load Polarsteps directory" TextWrapping="Wrap" Width="138" VerticalAlignment="Top" Margin="0,2,0,0" HorizontalAlignment="Left"/>
             <Button Content="{Binding PolarstepsButtonContent}" Click="Button_Click_Polarsteps_Dir" Height="23" Width="182" VerticalAlignment="Top" Margin="163,0,0,0" HorizontalAlignment="Left"/>
-            <ComboBox ItemsSource="{Binding PolarstepsCBItems}" SelectedItem="{Binding PolarstepsCBSelectedItem}" Width="182" IsEnabled="{Binding PolarstepsCBIsEnabled}" VerticalAlignment="Top" Margin="163,34,0,0" HorizontalAlignment="Left"/>
+            <ComboBox ItemsSource="{Binding PolarstepsCBItems}" SelectedItem="{Binding PolarstepsCBSelectedItem}" Width="182" IsEnabled="{Binding PolarstepsCBIsEnabled}" VerticalAlignment="Top" Margin="163,34,0,0" HorizontalAlignment="Left" SelectionChanged="ComboBox_SelectionChanged"/>
             <TextBlock Text="Select trip to process" TextWrapping="Wrap" Width="138" IsEnabled="{Binding PolarstepsCBIsEnabled}" VerticalAlignment="Top" Margin="0,40,0,0" HorizontalAlignment="Left"/>
             <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsValidDirectory}" VerticalAlignment="Top" Margin="138,3,0,0" HorizontalAlignment="Left"/>
             <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsTripSelected}" VerticalAlignment="Top" Margin="138,38,0,0" HorizontalAlignment="Left"/>
+            <Button x:Name="PolarstepsStartProcessing" Content="Process!" HorizontalAlignment="Left" Margin="22,88,0,0" VerticalAlignment="Top" Width="94" Click="PolarstepsStartProcessing_Click"/>
         </Grid>
     </Grid>
 </Window>
