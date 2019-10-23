@@ -6,20 +6,53 @@
         xmlns:local="clr-namespace:PolarstepsCompanion"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid RenderTransformOrigin="0.732,0.509">
-        <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Text="Load Image to show Exif info" TextWrapping="Wrap" VerticalAlignment="Top" Height="27" Width="232" Cursor="Arrow"/>
-        <Button Content="Browse" HorizontalAlignment="Left" Margin="242,10,0,0" VerticalAlignment="Top" Click="Button_Click_1"/>
-        <ScrollViewer Margin="10,42,439,82">
-            <TextBlock Name="ImageMetadataBox" Text="{Binding Path=TextBlockContent}" TextWrapping="Wrap" Width="351" Foreground="Black"/>
-        </ScrollViewer>
-        <Grid HorizontalAlignment="Left" Height="416" Margin="400,8,0,0" VerticalAlignment="Top" Width="390">
-            <TextBlock Height="27" Text="Load Polarsteps directory" TextWrapping="Wrap" Width="138" VerticalAlignment="Top" Margin="0,2,0,0" HorizontalAlignment="Left"/>
-            <Button Content="{Binding PolarstepsButtonContent}" Click="Button_Click_Polarsteps_Dir" Height="23" Width="182" VerticalAlignment="Top" Margin="163,0,0,0" HorizontalAlignment="Left"/>
-            <ComboBox ItemsSource="{Binding PolarstepsCBItems}" SelectedItem="{Binding PolarstepsCBSelectedItem}" Width="182" IsEnabled="{Binding PolarstepsCBIsEnabled}" VerticalAlignment="Top" Margin="163,34,0,0" HorizontalAlignment="Left" SelectionChanged="ComboBox_SelectionChanged"/>
-            <TextBlock Text="Select trip to process" TextWrapping="Wrap" Width="138" IsEnabled="{Binding PolarstepsCBIsEnabled}" VerticalAlignment="Top" Margin="0,40,0,0" HorizontalAlignment="Left"/>
-            <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsValidDirectory}" VerticalAlignment="Top" Margin="138,3,0,0" HorizontalAlignment="Left"/>
-            <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsTripSelected}" VerticalAlignment="Top" Margin="138,38,0,0" HorizontalAlignment="Left"/>
-            <Button x:Name="PolarstepsStartProcessing" Content="Process!" HorizontalAlignment="Left" Margin="22,88,0,0" VerticalAlignment="Top" Width="94" Click="PolarstepsStartProcessing_Click"/>
-        </Grid>
-    </Grid>
+    <Window.Resources>
+        <local:ImageConverter x:Key="ImageConverter"  />
+    </Window.Resources>
+    <TabControl>
+        <TabItem Header="1. Select Photos Directory">
+            <Grid Background="#FFF">
+                <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Text="Select directory containing your photos:" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                <Button x:Name="SelectPhotosDir" Content="Browse" HorizontalAlignment="Left" Margin="226,8,0,0" VerticalAlignment="Top" Width="74" Click="SelectPhotosDir_Click"/>
+                <TextBlock HorizontalAlignment="Left" Margin="305,10,0,0" Text="{Binding PhotosPath}" TextWrapping="Wrap" VerticalAlignment="Top" Width="479"/>
+                <DataGrid Name="ImagePreviewDataGrid" Margin="10,45,10,10" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn x:Name="FilenameColumn" CanUserSort="False" Header="Filename" Binding="{Binding ImagePreviewFilename}"/>
+                        <DataGridTemplateColumn Header="Preview">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Image Width="100" Height="100" HorizontalAlignment="Center" 
+                                           Source="{Binding ImagePreviewFilename,
+                                        Converter={StaticResource ImageConverter}}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <!--<ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,2" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>-->
+            </Grid>
+        </TabItem>
+        <TabItem Header="1. Select Photos Directory">
+            <Grid Background="#FFFFFF">
+                <TextBlock HorizontalAlignment="Left" Text="Load Image to show Exif info" TextWrapping="Wrap" VerticalAlignment="Top" Height="27" Width="232" Cursor="Arrow"/>
+                <Button Content="Browse" HorizontalAlignment="Left" Margin="232,0,0,0" VerticalAlignment="Top" Click="Button_Click_1"/>
+                <TextBlock Margin="10,32,10,0" x:Name="ImageMetadataBox" Text="{Binding TextBlockContent}" TextWrapping="Wrap" Foreground="Black"/>
+            </Grid>
+        </TabItem>
+        <TabItem Header="TabItem">
+            <Grid Background="#FFFFFF">
+                <TextBlock Text="Load Polarsteps directory" TextWrapping="Wrap" Width="138" VerticalAlignment="Top" Margin="10,42,0,0" HorizontalAlignment="Left"/>
+                <TextBlock Text="Select trip to process" TextWrapping="Wrap" Width="138" IsEnabled="{Binding PolarstepsCBIsEnabled}" VerticalAlignment="Top" Margin="10,98,0,0" HorizontalAlignment="Left"/>
+                <Button Content="{Binding PolarstepsButtonContent}" Click="Button_Click_Polarsteps_Dir" Height="23" Width="182" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="235,44,0,0"/>
+                <ComboBox ItemsSource="{Binding PolarstepsCBItems}" SelectedItem="{Binding PolarstepsCBSelectedItem}" IsEnabled="{Binding PolarstepsCBIsEnabled}" SelectionChanged="ComboBox_SelectionChanged" Margin="235,87,0,0" Height="30" VerticalAlignment="Top" HorizontalAlignment="Left" Width="182"/>
+                <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsValidDirectory}" VerticalAlignment="Top" Margin="158,41,0,0" HorizontalAlignment="Left"/>
+                <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsTripSelected}" VerticalAlignment="Top" Margin="158,98,0,0" HorizontalAlignment="Left"/>
+                <Button x:Name="PolarstepsStartProcessing" Content="Process!" HorizontalAlignment="Left" Margin="111,183,0,0" VerticalAlignment="Top" Width="94" Click="PolarstepsStartProcessing_Click"/>
+            </Grid>
+        </TabItem>
+    </TabControl>
 </Window>

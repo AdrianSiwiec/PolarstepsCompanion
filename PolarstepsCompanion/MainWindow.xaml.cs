@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,6 +32,49 @@ namespace PolarstepsCompanion
             InitializeComponent();
             this.DataContext = this;
             this.PolarstepsCBItems = new ObservableCollection<ComboBoxItem>();
+        }
+
+        private string photosPath;
+        public string PhotosPath
+        {
+            get => photosPath;
+            set
+            {
+                photosPath = value;
+                RaisePropertyChanged("PhotosPath");
+            }
+        }
+
+        class ImagePreviewClass
+        {
+            private string imagePreviewFilename;
+            private Image imagePreviewThumbnail;
+            private string imagePreviewPath;
+            private Uri imagePreviewUri;
+
+            public ImagePreviewClass(string path)
+            {
+                this.ImagePreviewFilename = path;
+                this.ImagePreviewPath = path;
+
+                this.ImagePreviewThumbnail = new Image();
+                ImagePreviewThumbnail.Width = 100;
+
+                BitmapImage bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(path);
+                bitmap.DecodePixelWidth = 100;
+                bitmap.EndInit();
+
+                this.ImagePreviewUri = new Uri(path);
+
+                ImagePreviewThumbnail.Source = bitmap;
+            }
+
+            public string ImagePreviewFilename { get => imagePreviewFilename; set => imagePreviewFilename = value; }
+            public string ImagePreviewPath { get => imagePreviewPath; set => imagePreviewPath = value; }
+            public Image ImagePreviewThumbnail { get => imagePreviewThumbnail; set => imagePreviewThumbnail = value; }
+            public Uri ImagePreviewUri { get => imagePreviewUri; set => imagePreviewUri = value; }
         }
 
         private string textBlockContent = "Empty so far...";
@@ -77,6 +121,7 @@ namespace PolarstepsCompanion
                 RaisePropertyChanged("PolarstepsIsTripSelected");
             }
         }
+
         // Polarsteps Trips CB
         public ObservableCollection<ComboBoxItem> PolarstepsCBItems { get; set; }
         public ComboBoxItem PolarstepsCBSelectedItem { get; set; }
@@ -152,8 +197,11 @@ namespace PolarstepsCompanion
 
         private void Button_Click_Polarsteps_Dir(object sender, RoutedEventArgs e)
         {
-            CommonOpenFileDialog fileDialog = new CommonOpenFileDialog();
-            fileDialog.IsFolderPicker = true;
+            using CommonOpenFileDialog fileDialog = new CommonOpenFileDialog
+            {
+                IsFolderPicker = true
+            };
+
             if (fileDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
                 polarstepsProcessor = new PolarstepsProcessor(fileDialog.FileName);
@@ -187,10 +235,44 @@ namespace PolarstepsCompanion
 
         private void PolarstepsStartProcessing_Click(object sender, RoutedEventArgs e)
         {
-            if(PolarstepsIsValidDirectory && PolarstepsIsTripSelected)
+            if (PolarstepsIsValidDirectory && PolarstepsIsTripSelected)
             {
                 polarstepsProcessor.Process();
             }
+        }
+
+        private void SelectPhotosDir_Click(object sender, RoutedEventArgs e)
+        {
+            using CommonOpenFileDialog fileDialog = new CommonOpenFileDialog
+            {
+                IsFolderPicker = true
+            };
+
+            if (fileDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                PhotosPath = fileDialog.FileName;
+
+                List<ImagePreviewClass> images = new List<ImagePreviewClass>();
+                images.Add(new ImagePreviewClass("C:\\git\\PolarstepsCompanion\\test images\\camera.JPG"));
+                images.Add(new ImagePreviewClass("C:\\git\\PolarstepsCompanion\\test images\\phone.JPG"));
+
+                ImagePreviewDataGrid.ItemsSource = images;
+            }
+        }
+    }
+
+    public class ImageConverter : IValueConverter
+    {
+        public object Convert(
+            object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return new BitmapImage(new Uri(value.ToString()));
+        }
+
+        public object ConvertBack(
+            object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotSupportedException();
         }
     }
 }
