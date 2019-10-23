@@ -16,7 +16,7 @@
                 <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Text="Select directory containing your photos:" TextWrapping="Wrap" VerticalAlignment="Top"/>
                 <Button x:Name="SelectPhotosDir" Content="Browse" HorizontalAlignment="Left" Margin="226,8,0,0" VerticalAlignment="Top" Width="74" Click="SelectPhotosDir_Click"/>
                 <TextBlock HorizontalAlignment="Left" Margin="305,10,0,0" Text="{Binding PhotosPath}" TextWrapping="Wrap" VerticalAlignment="Top" Width="479"/>
-                <DataGrid Name="ImagePreviewDataGrid" Margin="10,45,10,31" AutoGenerateColumns="False" SelectionChanged="ImagePreviewDataGrid_SelectionChanged">
+                <DataGrid Name="ImagePreviewDataGrid" Margin="10,38,10,38" AutoGenerateColumns="False" SelectionChanged="ImagePreviewDataGrid_SelectionChanged">
                     <DataGrid.Columns>
                         <DataGridTextColumn x:Name="FilenameColumn" CanUserSort="False" Header="Filename" Binding="{Binding ImagePreviewFilename}" IsReadOnly="True"/>
                         <DataGridTemplateColumn Header="Preview">
@@ -38,7 +38,32 @@
                     </ListBox.ItemTemplate>-->
             </Grid>
         </TabItem>
-        <TabItem Header="2. Fix time in your photos"/>
+        <TabItem Header="2. Fix time in your photos">
+            <Grid Background="#FFF">
+                <TextBlock Margin="10,10,10,0" Text=" Sometimes, time and date of your camera weren't set properly. You can fix it here. &#x0a; You can load a pair of pictures taken at the same time - one from your camera and one with proper time (e.g. from your phone). &#x0a; Capture time of the camera photo will be shifted to match capture time of the exemplary photo. &#x0a; Or alternatively you can select the time of the photo manually. &#x0a; All your other photos' time will be shifted by the same amount."  TextWrapping="Wrap" VerticalAlignment="Top" Height="96" Background="#FFD6D6D6"/>
+                <Grid Margin="10,111,10,10">
+                    <TextBlock HorizontalAlignment="Left" Text="Would you like to fix the time and date of your images?" TextWrapping="Wrap" VerticalAlignment="Top" Height="19" Width="315"/>
+                    <RadioButton x:Name="FixTimeNoButton" Content="Don't fix the time" HorizontalAlignment="Left" Margin="320,2,0,0" VerticalAlignment="Top" IsChecked="True"/>
+                    <RadioButton x:Name="FixTimeYesButton" Content="Fix using two photos" HorizontalAlignment="Left" Margin="436,2,0,0" VerticalAlignment="Top"/>
+                    <RadioButton Content="Fix by manually selecting the time" HorizontalAlignment="Left" Margin="570,2,0,0" VerticalAlignment="Top"/>
+                    <Grid x:Name="FixTimeTwoPhotosGrid" Margin="0,24,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0">
+                            <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Text="Load Sample Photo" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                            <Button Content="Browse" HorizontalAlignment="Left" Margin="118,8,0,0" VerticalAlignment="Top" Width="97"/>
+                        </Grid>
+                        <Grid Grid.Column="1">
+                            <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Text="Load Exemplary Photo (with proper time)" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                            <Button Content="Browse" HorizontalAlignment="Left" Margin="232,8,0,0" VerticalAlignment="Top" Width="97"/>
+                        </Grid>
+                    </Grid>
+                </Grid>
+
+            </Grid>
+        </TabItem>
         <TabItem Header="3. Select Polarsteps Directory">
             <Grid Background="#FFFFFF">
                 <Grid.ColumnDefinitions>
