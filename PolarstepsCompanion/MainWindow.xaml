@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PolarstepsCompanion"
         mc:Ignorable="d"
-        Title="Polarsteps Companion App" Height="450" Width="800"
+        Title="Polarsteps Companion App" Height="450" Width="850"
     xmlns:System="clr-namespace:System;assembly=System.Runtime"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit">
     <Window.Resources>
@@ -17,7 +17,7 @@
                 <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Text="Select directory containing your photos:" TextWrapping="Wrap" VerticalAlignment="Top"/>
                 <Button x:Name="SelectPhotosDir" Content="Browse" HorizontalAlignment="Left" Margin="226,8,0,0" VerticalAlignment="Top" Width="74" Click="SelectPhotosDir_Click"/>
                 <TextBlock HorizontalAlignment="Left" Margin="305,10,0,0" Text="{Binding PhotosPath}" TextWrapping="Wrap" VerticalAlignment="Top" Width="479"/>
-                <DataGrid Name="ImagePreviewDataGrid" Margin="10,38,10,38" AutoGenerateColumns="False" SelectionChanged="ImagePreviewDataGrid_SelectionChanged">
+                <DataGrid ScrollViewer.CanContentScroll="False" Name="ImagePreviewDataGrid" Margin="10,38,10,38" AutoGenerateColumns="False" SelectionChanged="ImagePreviewDataGrid_SelectionChanged">
                     <DataGrid.Columns>
                         <DataGridTextColumn x:Name="FilenameColumn" CanUserSort="False" Header="Filename" Binding="{Binding ImagePreviewFilename}" IsReadOnly="True"/>
                         <DataGridTemplateColumn Header="Preview">
@@ -47,7 +47,7 @@
                     <RadioButton x:Name="FixTimeNoButton" Content="Don't fix the time" HorizontalAlignment="Left" Margin="320,2,0,0" VerticalAlignment="Top" IsChecked="True" Checked="FixTimeNoButton_Checked"/>
                     <RadioButton x:Name="FixTimeCameraButton" Content="Fix using two photos" HorizontalAlignment="Left" Margin="436,2,0,0" VerticalAlignment="Top" Checked="FixTimeCameraButton_Checked"/>
                     <RadioButton x:Name="FixTimeManualButton" Content="Fix by manually selecting the time" HorizontalAlignment="Left" Margin="570,2,0,0" VerticalAlignment="Top" Checked="FixTimeManualButton_Checked"/>
-                    <Grid x:Name="FixTimePhotosGrid" Margin="0,24,0,0" Visibility="Collapsed">
+                    <Grid x:Name="FixTimePhotosGrid" Margin="0,24,0,21" Visibility="Collapsed">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
@@ -62,12 +62,12 @@
                         <Grid Grid.Column="1">
                             <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Text="Load Sample Camera Photo" TextWrapping="Wrap" VerticalAlignment="Top"/>
                             <Button x:Name="FixTimePhoneBrowse" Content="Browse" HorizontalAlignment="Left" Margin="162,8,0,0" VerticalAlignment="Top" Width="97" Click="FixTimePhotoBrowse_Click"/>
-                            <TextBlock Text="{Binding FixTimePhotoDateTakenString}" HorizontalAlignment="Left" Margin="10,35,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="367"/>
-                            <TextBlock Text="{Binding FixTimePhotoFilename}" Margin="10,60,10,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                            <TextBlock Text="{Binding FixTimePhotoFilename}" Margin="10,35,10,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                            <TextBlock Text="{Binding FixTimePhotoDateTakenString}" HorizontalAlignment="Left" Margin="10,60,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="367"/>
                             <Image x:Name="FixTimePhonePreview" Margin="10,85,10,0" Source="{Binding FixTimePhotoPhotoPath}" VerticalAlignment="Top"/>
                         </Grid>
                     </Grid>
-                    <Grid x:Name="FixTimeManualGrid" Margin="0,24,0,0" Visibility="Collapsed">
+                    <Grid x:Name="FixTimeManualGrid" Margin="0,24,0,21" Visibility="Collapsed">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
@@ -81,25 +81,51 @@
                         </Grid>
                         <Grid Grid.Column="1">
                             <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="Select correct time for this photo:" TextWrapping="Wrap" VerticalAlignment="Top" Width="367"/>
-                            <xctk:DateTimePicker x:Name="FixTimeManualDateTime" Margin="10,31,0,0" Height="22" VerticalAlignment="Top" HorizontalAlignment="Left" Width="320" />
+                            <xctk:DateTimePicker x:Name="FixTimeManualDateTime" Margin="10,31,0,0" Height="22" VerticalAlignment="Top" HorizontalAlignment="Left" Width="320" ValueChanged="FixTimeManualDateTime_ValueChanged" />
                         </Grid>
                     </Grid>
+                    <TextBlock Margin="10,0,10,1" Text="{Binding FixTimeTimeSpanMessage}" TextWrapping="Wrap" Height="16" VerticalAlignment="Bottom" TextAlignment="Center"/>
                 </Grid>
-
             </Grid>
         </TabItem>
-        <TabItem Header="3. Select Polarsteps Directory">
+        <TabItem Header="3. Select Polarsteps directory" Margin="-3,-2,-1,0">
             <Grid Background="#FFFFFF">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="Load Polarsteps directory" TextWrapping="Wrap" Width="138" VerticalAlignment="Top" Margin="10,42,0,0" HorizontalAlignment="Left"/>
-                <TextBlock Text="Select trip to process" TextWrapping="Wrap" Width="138" IsEnabled="{Binding PolarstepsCBIsEnabled}" VerticalAlignment="Top" Margin="10,98,0,0" HorizontalAlignment="Left"/>
-                <Button Content="{Binding PolarstepsButtonContent}" Click="Button_Click_Polarsteps_Dir" Height="23" Width="182" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="235,44,0,0"/>
-                <ComboBox ItemsSource="{Binding PolarstepsCBItems}" SelectedItem="{Binding PolarstepsCBSelectedItem}" IsEnabled="{Binding PolarstepsCBIsEnabled}" SelectionChanged="ComboBox_SelectionChanged" Margin="235,87,0,0" Height="30" VerticalAlignment="Top" HorizontalAlignment="Left" Width="182"/>
-                <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsValidDirectory}" VerticalAlignment="Top" Margin="158,41,0,0" HorizontalAlignment="Left"/>
-                <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsTripSelected}" VerticalAlignment="Top" Margin="158,98,0,0" HorizontalAlignment="Left"/>
+                <TextBlock Margin="10,10,10,0" Text=" Select a directory containing your Polarsteps data. You can download your data from Polarsteps website. &#x0a; After extracting downloaded data, the directory is usually named $NAME$. &#x0a; It should contain directories named 'trip' and 'user'."  TextWrapping="Wrap" VerticalAlignment="Top" Height="52" Background="#FFD6D6D6"/>
+                <TextBlock Text="Load Polarsteps directory" TextWrapping="Wrap" Width="138" VerticalAlignment="Top" Margin="10,70,0,0" HorizontalAlignment="Left"/>
+                <TextBlock Text="Select trip to process" TextWrapping="Wrap" Width="138" IsEnabled="{Binding PolarstepsCBIsEnabled}" VerticalAlignment="Top" Margin="10,105,0,0" HorizontalAlignment="Left"/>
+                <Button Content="Browse" Click="Button_Click_Polarsteps_Dir" Height="23" Width="74" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="183,67,0,0"/>
+                <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsValidDirectory}" VerticalAlignment="Top" Margin="158,71,0,0" HorizontalAlignment="Left"/>
+                <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsTripSelected}" VerticalAlignment="Top" Margin="158,106,0,0" HorizontalAlignment="Left"/>
+                <ComboBox ItemsSource="{Binding PolarstepsCBItems}" SelectedItem="{Binding PolarstepsCBSelectedItem}" IsEnabled="{Binding PolarstepsCBIsEnabled}" SelectionChanged="ComboBox_SelectionChanged" Margin="183,101,0,0" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" Width="182"/>
+                <TextBlock Margin="262,70,10,0" Text="{Binding PolarstepsDirectoryPath}" TextWrapping="Wrap" VerticalAlignment="Top"/>
                 <Button x:Name="PolarstepsStartProcessing" Content="Process!" HorizontalAlignment="Left" Margin="111,183,0,0" VerticalAlignment="Top" Width="94" Click="PolarstepsStartProcessing_Click"/>
+            </Grid>
+        </TabItem>
+        <TabItem Header="4. Preview the changes" Margin="-3,-2,-1,0">
+            <Grid Background="#FFFFFF">
+                <TextBlock Margin="10,10,10,0" Text=" Sometimes, when you copy photos from multiple directories, their order gets lost. &#x0a; You can rename the photos here, using format: YYYY.MM.DD.HH.MM.SS.[old name] "  TextWrapping="Wrap" VerticalAlignment="Top" Height="37" Background="#FFD6D6D6"/>
+                <TextBlock HorizontalAlignment="Left" Margin="10,52,0,0" Text="Would you like to rename the photos?" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                <TextBlock HorizontalAlignment="Left" Margin="10,80,0,0" Text="Select output directory." TextWrapping="Wrap" VerticalAlignment="Top" Width="136"/>
+                <Button x:Name="OutputDirectoryButton" Content="Browse" HorizontalAlignment="Left" Margin="180,78,0,0" VerticalAlignment="Top" Width="71" Click="OutputDirectoryButton_Click"/>
+                <TextBlock Margin="256,80,10,0" Text="{Binding OutputDirectoryPath}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                <CheckBox Content="" IsEnabled="False" HorizontalAlignment="Left" Margin="140,81,0,0" VerticalAlignment="Top" IsChecked="{Binding OutputIsDirectoryValid}"/>
+                <RadioButton Content="No" IsChecked="True" HorizontalAlignment="Left" Margin="218,53,0,0" VerticalAlignment="Top"/>
+                <RadioButton Content="Yes" HorizontalAlignment="Left" Margin="258,53,0,0" VerticalAlignment="Top"/>
+
+                <DataGrid ScrollViewer.CanContentScroll="False" Name="PreviewDataGrid" Margin="10,103,10,38" AutoGenerateColumns="False" SelectionChanged="ImagePreviewDataGrid_SelectionChanged">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn x:Name="PreviewFilenameColumn" CanUserSort="False" Header="Filename" Binding="{Binding ImagePreviewFilename}" IsReadOnly="True"/>
+                        <DataGridTemplateColumn Header="Preview">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Image HorizontalAlignment="Center" 
+                                           Source="{Binding ImagePreviewPath,
+                                        Converter={StaticResource ImageConverter}}" Height="{DynamicResource PreviewImageHeight}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
         </TabItem>
         <TabItem Header="1. Select Photos Directory">

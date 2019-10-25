@@ -1,4 +1,5 @@
-﻿using MetadataExtractor;
+﻿using GalaSoft.MvvmLight.Messaging;
+using MetadataExtractor;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
@@ -29,85 +30,21 @@ namespace PolarstepsCompanion
 
         static public string[] PhotoExtensions = { ".JPG", ".JPEG", ".NEF" };
         static public readonly string PhotoExtensionsString = "Photos|*.jpg;*.jpeg;*.nef";
+
+        private PolarstepsProcessor polarstepsProcessor;
         public MainWindow()
         {
             InitializeComponent();
+            Messenger.Default.Register<String>(this, (action) => ReceiveMessage(action));
             this.DataContext = this;
             this.PolarstepsCBItems = new ObservableCollection<ComboBoxItem>();
         }
 
-        private string photosPath;
-        public string PhotosPath
+        private void ReceiveMessage(string message)
         {
-            get => photosPath;
-            set
-            {
-                photosPath = value;
-                RaisePropertyChanged("PhotosPath");
-            }
-        }
-
-        private string textBlockContent = "Empty so far...";
-        public string TextBlockContent
-        {
-            get { return textBlockContent; }
-            set
-            {
-                textBlockContent = value;
-                RaisePropertyChanged("TextBlockContent");
-            }
-        }
-
-        private string polarstepsButtonContent = "Browse...";
-        public string PolarstepsButtonContent
-        {
-            get { return polarstepsButtonContent; }
-            set
-            {
-                polarstepsButtonContent = value;
-                RaisePropertyChanged("PolarstepsButtonContent");
-            }
-        }
-
-        private bool polarstepsIsValidDirectory = false;
-        public bool PolarstepsIsValidDirectory
-        {
-            get { return polarstepsIsValidDirectory; }
-            set
-            {
-                polarstepsIsValidDirectory = value;
-                RaisePropertyChanged("PolarstepsIsValidDirectory");
-            }
 
         }
 
-        private bool polarstepsIsTripSelected = false;
-        public bool PolarstepsIsTripSelected
-        {
-            get { return polarstepsIsTripSelected; }
-            set
-            {
-                polarstepsIsTripSelected = value;
-                RaisePropertyChanged("PolarstepsIsTripSelected");
-            }
-        }
-
-        // Polarsteps Trips CB
-        public ObservableCollection<ComboBoxItem> PolarstepsCBItems { get; set; }
-        public ComboBoxItem PolarstepsCBSelectedItem { get; set; }
-        private bool polarstepsCbIsEnabled = false;
-        public bool PolarstepsCBIsEnabled
-        {
-            get { return polarstepsCbIsEnabled; }
-            set
-            {
-                polarstepsCbIsEnabled = value;
-                RaisePropertyChanged("PolarstepsCBIsEnabled");
-            }
-        }
-
-
-        private PolarstepsProcessor polarstepsProcessor;
 
         private void RaisePropertyChanged(string propName)
         {
@@ -118,8 +55,6 @@ namespace PolarstepsCompanion
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-
-
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
@@ -141,8 +76,6 @@ namespace PolarstepsCompanion
                 }
 
             }
-
-
             // For future use
             //CommonOpenFileDialog common = new CommonOpenFileDialog();
             //common.IsFolderPicker = true;
@@ -151,50 +84,27 @@ namespace PolarstepsCompanion
             //    Trace.WriteLine(common.FileName);
             //}
         }
-
-        private void Button_Click_Polarsteps_Dir(object sender, RoutedEventArgs e)
+        private string textBlockContent = "Empty so far...";
+        public string TextBlockContent
         {
-            using CommonOpenFileDialog fileDialog = new CommonOpenFileDialog
+            get { return textBlockContent; }
+            set
             {
-                IsFolderPicker = true
-            };
-
-            if (fileDialog.ShowDialog() == CommonFileDialogResult.Ok)
-            {
-                polarstepsProcessor = new PolarstepsProcessor(fileDialog.FileName);
-
-                if (!polarstepsProcessor.IsValidDirectory)
-                {
-                    PolarstepsIsValidDirectory = false;
-                    return;
-                }
-
-                PolarstepsButtonContent = fileDialog.FileName;
-                PolarstepsIsValidDirectory = true;
-
-                PolarstepsCBItems.Clear();
-                foreach (string trip in polarstepsProcessor.TripNames)
-                {
-                    PolarstepsCBItems.Add(new ComboBoxItem { Content = new PolarstepsTrip(trip) });
-                }
-                PolarstepsCBIsEnabled = true;
+                textBlockContent = value;
+                RaisePropertyChanged("TextBlockContent");
             }
         }
 
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (e.AddedItems.Count > 0)
-            {
-                polarstepsProcessor.TripSelected(e.AddedItems[0]);
-                PolarstepsIsTripSelected = polarstepsProcessor.SelectedTrip != null;
-            }
-        }
+        // Photos Tab
 
-        private void PolarstepsStartProcessing_Click(object sender, RoutedEventArgs e)
+        private string photosPath;
+        public string PhotosPath
         {
-            if (PolarstepsIsValidDirectory && PolarstepsIsTripSelected)
+            get => photosPath;
+            set
             {
-                polarstepsProcessor.Process();
+                photosPath = value;
+                RaisePropertyChanged("PhotosPath");
             }
         }
 
@@ -223,6 +133,7 @@ namespace PolarstepsCompanion
                 }
 
                 ImagePreviewDataGrid.ItemsSource = images;
+                PreviewDataGrid.ItemsSource = images;
 
                 PhotosLoadedInfo.Text = $"{images.Count} photos loaded succesfully.";
                 RaisePropertyChanged("PhotosLoadedInfo");
@@ -258,7 +169,7 @@ namespace PolarstepsCompanion
             }
         }
 
-        private DateTime? fixTimeCameraDateTaken = new DateTime(1451123);
+        private DateTime? fixTimeCameraDateTaken;
         public DateTime? FixTimeCameraDateTaken
         {
             get => fixTimeCameraDateTaken; set
@@ -302,7 +213,7 @@ namespace PolarstepsCompanion
             }
         }
 
-        private DateTime? fixTimePhotoDateTaken = new DateTime(1451123);
+        private DateTime? fixTimePhotoDateTaken;
         public DateTime? FixTimePhotoDateTaken
         {
             get => fixTimePhotoDateTaken; set
@@ -335,6 +246,7 @@ namespace PolarstepsCompanion
                 FixTimeCameraPhotoPath = fileDialog.FileName;
                 FixTimeCameraFilename = System.IO.Path.GetFileName(fileDialog.FileName);
                 FixTimeCameraDateTaken = PhotoProcessor.GetPhotoDateTaken(fileDialog.FileName);
+                UpdateTimeSpanCamera();
             }
         }
 
@@ -349,7 +261,16 @@ namespace PolarstepsCompanion
                 FixTimePhotoPhotoPath = fileDialog.FileName;
                 FixTimePhotoFilename = System.IO.Path.GetFileName(fileDialog.FileName);
                 FixTimePhotoDateTaken = PhotoProcessor.GetPhotoDateTaken(fileDialog.FileName);
+                UpdateTimeSpanCamera();
             }
+        }
+
+        private void UpdateTimeSpanCamera()
+        {
+            if (FixTimeCameraDateTaken != null && FixTimePhotoDateTaken != null)
+                FixTimeTimeSpan = FixTimePhotoDateTaken - FixTimeCameraDateTaken;
+            else
+                FixTimeTimeSpan = null;
         }
 
         public enum FixTime
@@ -384,16 +305,19 @@ namespace PolarstepsCompanion
         private void FixTimeCameraButton_Checked(object sender, RoutedEventArgs e)
         {
             FixTimeOption = FixTime.Photos;
+            UpdateTimeSpanCamera();
         }
 
         private void FixTimeNoButton_Checked(object sender, RoutedEventArgs e)
         {
             FixTimeOption = FixTime.None;
+            FixTimeTimeSpan = null;
         }
 
         private void FixTimeManualButton_Checked(object sender, RoutedEventArgs e)
         {
             FixTimeOption = FixTime.Manual;
+            UpdateTimeSpanManual();
         }
 
         private string fixTimeManualPhotoPath;
@@ -437,6 +361,7 @@ namespace PolarstepsCompanion
             }
         }
 
+
         private string fixTimeManualDateTakenString;
 
         private void FixTimeManualBrowse_Click(object sender, RoutedEventArgs e)
@@ -445,15 +370,194 @@ namespace PolarstepsCompanion
             {
                 Filter = PhotoExtensionsString
             };
-            if(fileDialog.ShowDialog() == true)
+            if (fileDialog.ShowDialog() == true)
             {
                 FixTimeManualPhotoPath = fileDialog.FileName;
                 FixTimeManualFilename = System.IO.Path.GetFileName(fileDialog.FileName);
                 FixTimeManualDateTaken = PhotoProcessor.GetPhotoDateTaken(fileDialog.FileName);
 
                 FixTimeManualDateTime.Value = FixTimeManualDateTaken;
+
+                UpdateTimeSpanManual();
             }
         }
 
+        private void FixTimeManualDateTime_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            UpdateTimeSpanManual();
+        }
+
+        private void UpdateTimeSpanManual()
+        {
+            if (FixTimeManualDateTime.Value != null && FixTimeManualDateTaken != null)
+                FixTimeTimeSpan = FixTimeManualDateTime.Value - FixTimeManualDateTaken;
+            else
+                FixTimeTimeSpan = null;
+        }
+
+        private TimeSpan? fixTimeTimeSpan;
+        public TimeSpan? FixTimeTimeSpan
+        {
+            get => fixTimeTimeSpan; set
+            {
+                fixTimeTimeSpan = value;
+                if (value != null)
+                    FixTimeTimeSpanMessage = "Your photos will be shifted by: " + Commons.TimeSpanPretty(value.Value);
+                else
+                    FixTimeTimeSpanMessage = "";
+            }
+        }
+
+        private string fixTimeTimeSpanMessage;
+        public string FixTimeTimeSpanMessage
+        {
+            get => fixTimeTimeSpanMessage; set
+            {
+                fixTimeTimeSpanMessage = value;
+                RaisePropertyChanged("FixTimeTimeSpanMessage");
+            }
+        }
+
+
+        // Polarsteps tab
+        private string polarstepsDirectoryPath;
+        public string PolarstepsDirectoryPath
+        {
+            get { return polarstepsDirectoryPath; }
+            set
+            {
+                polarstepsDirectoryPath = value;
+                RaisePropertyChanged("polarstepsDirectoryPath");
+            }
+        }
+
+        private bool polarstepsIsValidDirectory = false;
+        public bool PolarstepsIsValidDirectory
+        {
+            get { return polarstepsIsValidDirectory; }
+            set
+            {
+                polarstepsIsValidDirectory = value;
+                RaisePropertyChanged("PolarstepsIsValidDirectory");
+            }
+
+        }
+
+        private bool polarstepsIsTripSelected = false;
+        public bool PolarstepsIsTripSelected
+        {
+            get { return polarstepsIsTripSelected; }
+            set
+            {
+                polarstepsIsTripSelected = value;
+                RaisePropertyChanged("PolarstepsIsTripSelected");
+            }
+        }
+
+        public ObservableCollection<ComboBoxItem> PolarstepsCBItems { get; set; }
+        public ComboBoxItem PolarstepsCBSelectedItem { get; set; }
+        private bool polarstepsCbIsEnabled = false;
+        public bool PolarstepsCBIsEnabled
+        {
+            get { return polarstepsCbIsEnabled; }
+            set
+            {
+                polarstepsCbIsEnabled = value;
+                RaisePropertyChanged("PolarstepsCBIsEnabled");
+            }
+        }
+
+
+        private void Button_Click_Polarsteps_Dir(object sender, RoutedEventArgs e)
+        {
+            using CommonOpenFileDialog fileDialog = new CommonOpenFileDialog
+            {
+                IsFolderPicker = true
+            };
+
+            if (fileDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                polarstepsProcessor = new PolarstepsProcessor(fileDialog.FileName);
+
+                if (!polarstepsProcessor.IsValidDirectory)
+                {
+                    PolarstepsIsValidDirectory = false;
+                    return;
+                }
+
+                PolarstepsDirectoryPath = fileDialog.FileName;
+                PolarstepsIsValidDirectory = true;
+
+                PolarstepsCBItems.Clear();
+                foreach (string trip in polarstepsProcessor.TripNames)
+                {
+                    PolarstepsCBItems.Add(new ComboBoxItem { Content = new PolarstepsTrip(trip) });
+                }
+                PolarstepsCBIsEnabled = true;
+            }
+        }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count > 0)
+            {
+                polarstepsProcessor.TripSelected(e.AddedItems[0]);
+                PolarstepsIsTripSelected = polarstepsProcessor.SelectedTrip != null;
+            }
+        }
+
+        private void PolarstepsStartProcessing_Click(object sender, RoutedEventArgs e)
+        {
+            if (PolarstepsIsValidDirectory && PolarstepsIsTripSelected)
+            {
+                polarstepsProcessor.Process();
+            }
+        }
+
+        // Output tab
+
+        private string outputDirectoryPath;
+        public string OutputDirectoryPath
+        {
+            get => outputDirectoryPath; set
+            {
+                outputDirectoryPath = value;
+                RaisePropertyChanged("OutputDirectoryPath");
+            }
+        }
+
+        private bool outputIsDirectoryValid = false;
+        public bool OutputIsDirectoryValid
+        {
+            get => outputIsDirectoryValid; set
+            {
+                outputIsDirectoryValid = value;
+                RaisePropertyChanged("OutputIsDirectoryValid");
+            }
+        }
+
+        private void OutputDirectoryButton_Click(object sender, RoutedEventArgs e)
+        {
+            using CommonOpenFileDialog fileDialog = new CommonOpenFileDialog
+            {
+                IsFolderPicker = true,
+                EnsurePathExists = false,
+                Title = "Select output directory"
+            };
+
+            if (fileDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                if (string.Compare(fileDialog.FileName, PhotosPath, StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    OutputDirectoryPath = "Output directory should be different to selected photos directory.";
+                    OutputIsDirectoryValid = false;
+                }
+                else
+                {
+                    OutputDirectoryPath = fileDialog.FileName;
+                    OutputIsDirectoryValid = true;
+                }
+            }
+        }
     }
 }
