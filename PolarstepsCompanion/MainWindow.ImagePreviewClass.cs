@@ -10,7 +10,6 @@ namespace PolarstepsCompanion
             private string imagePreviewFilename;
             private string imagePreviewPath;
             private string imagePreviewDateTaken;
-            IEnumerable<Directory> metadataDirectories;
 
             public ImagePreviewClass(string rootDir, string path)
             {

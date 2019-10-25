@@ -26,6 +26,9 @@ namespace PolarstepsCompanion
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+
+        static public string[] PhotoExtensions = { ".JPG", ".JPEG", ".NEF" };
+        static public readonly string PhotoExtensionsString = "Photos|*.jpg;*.jpeg;*.nef";
         public MainWindow()
         {
             InitializeComponent();
@@ -199,7 +202,9 @@ namespace PolarstepsCompanion
         {
             using CommonOpenFileDialog fileDialog = new CommonOpenFileDialog
             {
-                IsFolderPicker = true
+                IsFolderPicker = true,
+                EnsurePathExists = true,
+                Title = "Select The Folder To Process"
             };
 
             if (fileDialog.ShowDialog() == CommonFileDialogResult.Ok)
@@ -208,7 +213,9 @@ namespace PolarstepsCompanion
 
                 ObservableCollection<ImagePreviewClass> images = new ObservableCollection<ImagePreviewClass>();
 
-                var imagePaths = System.IO.Directory.EnumerateFiles(fileDialog.FileName, "*.JPG", System.IO.SearchOption.AllDirectories);
+
+                var imagePaths = System.IO.Directory.EnumerateFiles(fileDialog.FileName, "*", System.IO.SearchOption.AllDirectories).
+                    Where(f => PhotoExtensions.Contains(System.IO.Path.GetExtension(f), StringComparer.InvariantCultureIgnoreCase));
 
                 foreach (string image in imagePaths)
                 {
@@ -226,5 +233,227 @@ namespace PolarstepsCompanion
         {
             ImagePreviewDataGrid.UnselectAllCells();
         }
+
+        //Fix Time Tab
+
+        private string fixTimeCameraPhotoPath;
+        public string FixTimeCameraPhotoPath
+        {
+            get => fixTimeCameraPhotoPath;
+            set
+            {
+                fixTimeCameraPhotoPath = value;
+                RaisePropertyChanged("FixTimeCameraPhotoPath");
+            }
+        }
+
+        private string fixTimeCameraFilename;
+        public string FixTimeCameraFilename
+        {
+            get => fixTimeCameraFilename;
+            set
+            {
+                fixTimeCameraFilename = value;
+                RaisePropertyChanged("FixTimeCameraFilename");
+            }
+        }
+
+        private DateTime? fixTimeCameraDateTaken = new DateTime(1451123);
+        public DateTime? FixTimeCameraDateTaken
+        {
+            get => fixTimeCameraDateTaken; set
+            {
+                fixTimeCameraDateTaken = value;
+                FixTimeCameraDateTakenString = "Date taken: " + value;
+            }
+        }
+
+        public string FixTimeCameraDateTakenString
+        {
+            get => fixTimeCameraDateTakenString; set
+            {
+                fixTimeCameraDateTakenString = value;
+                RaisePropertyChanged("FixTimeCameraDateTakenString");
+            }
+        }
+
+        private string fixTimeCameraDateTakenString;
+
+
+        private string fixTimePhotoPhotoPath;
+        public string FixTimePhotoPhotoPath
+        {
+            get => fixTimePhotoPhotoPath;
+            set
+            {
+                fixTimePhotoPhotoPath = value;
+                RaisePropertyChanged("FixTimePhotoPhotoPath");
+            }
+        }
+
+        private string fixTimePhotoFilename;
+        public string FixTimePhotoFilename
+        {
+            get => fixTimePhotoFilename;
+            set
+            {
+                fixTimePhotoFilename = value;
+                RaisePropertyChanged("FixTimePhotoFilename");
+            }
+        }
+
+        private DateTime? fixTimePhotoDateTaken = new DateTime(1451123);
+        public DateTime? FixTimePhotoDateTaken
+        {
+            get => fixTimePhotoDateTaken; set
+            {
+                fixTimePhotoDateTaken = value;
+                FixTimePhotoDateTakenString = "Date taken: " + value;
+            }
+        }
+
+        public string FixTimePhotoDateTakenString
+        {
+            get => fixTimePhotoDateTakenString; set
+            {
+                fixTimePhotoDateTakenString = value;
+                RaisePropertyChanged("FixTimePhotoDateTakenString");
+            }
+        }
+
+
+        private string fixTimePhotoDateTakenString;
+
+        private void FixTimeCameraBrowse_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog fileDialog = new OpenFileDialog
+            {
+                Filter = PhotoExtensionsString
+            };
+            if (fileDialog.ShowDialog() == true)
+            {
+                FixTimeCameraPhotoPath = fileDialog.FileName;
+                FixTimeCameraFilename = System.IO.Path.GetFileName(fileDialog.FileName);
+                FixTimeCameraDateTaken = PhotoProcessor.GetPhotoDateTaken(fileDialog.FileName);
+            }
+        }
+
+        private void FixTimePhotoBrowse_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog fileDialog = new OpenFileDialog
+            {
+                Filter = PhotoExtensionsString
+            };
+            if (fileDialog.ShowDialog() == true)
+            {
+                FixTimePhotoPhotoPath = fileDialog.FileName;
+                FixTimePhotoFilename = System.IO.Path.GetFileName(fileDialog.FileName);
+                FixTimePhotoDateTaken = PhotoProcessor.GetPhotoDateTaken(fileDialog.FileName);
+            }
+        }
+
+        public enum FixTime
+        {
+            None,
+            Photos,
+            Manual
+        };
+
+        private FixTime fixTimeOption = FixTime.None;
+        public FixTime FixTimeOption
+        {
+            get => fixTimeOption; set
+            {
+                fixTimeOption = value;
+
+                if (FixTimePhotosGrid != null)
+                    if (value == FixTime.Photos) FixTimePhotosGrid.Visibility = Visibility.Visible;
+                    else FixTimePhotosGrid.Visibility = Visibility.Collapsed;
+
+                if (FixTimeManualGrid != null)
+                    if (value == FixTime.Manual) FixTimeManualGrid.Visibility = Visibility.Visible;
+                    else FixTimeManualGrid.Visibility = Visibility.Collapsed;
+
+                RaisePropertyChanged("FixTimePhotosGrid");
+                RaisePropertyChanged("FixTimeManualGrid");
+            }
+        }
+
+
+
+        private void FixTimeCameraButton_Checked(object sender, RoutedEventArgs e)
+        {
+            FixTimeOption = FixTime.Photos;
+        }
+
+        private void FixTimeNoButton_Checked(object sender, RoutedEventArgs e)
+        {
+            FixTimeOption = FixTime.None;
+        }
+
+        private void FixTimeManualButton_Checked(object sender, RoutedEventArgs e)
+        {
+            FixTimeOption = FixTime.Manual;
+        }
+
+        private string fixTimeManualPhotoPath;
+        public string FixTimeManualPhotoPath
+        {
+            get => fixTimeManualPhotoPath;
+            set
+            {
+                fixTimeManualPhotoPath = value;
+                RaisePropertyChanged("FixTimeManualPhotoPath");
+            }
+        }
+
+        private string fixTimeManualFilename;
+        public string FixTimeManualFilename
+        {
+            get => fixTimeManualFilename;
+            set
+            {
+                fixTimeManualFilename = value;
+                RaisePropertyChanged("FixTimeManualFilename");
+            }
+        }
+
+        private DateTime? fixTimeManualDateTaken = new DateTime(1451123);
+        public DateTime? FixTimeManualDateTaken
+        {
+            get => fixTimeManualDateTaken; set
+            {
+                fixTimeManualDateTaken = value;
+                FixTimeManualDateTakenString = "Date taken: " + value;
+            }
+        }
+
+        public string FixTimeManualDateTakenString
+        {
+            get => fixTimeManualDateTakenString; set
+            {
+                fixTimeManualDateTakenString = value;
+                RaisePropertyChanged("FixTimeManualDateTakenString");
+            }
+        }
+
+        private string fixTimeManualDateTakenString;
+
+        private void FixTimeManualBrowse_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog fileDialog = new OpenFileDialog
+            {
+                Filter = PhotoExtensionsString
+            };
+            if(fileDialog.ShowDialog() == true)
+            {
+                FixTimeManualPhotoPath = fileDialog.FileName;
+                FixTimeManualFilename = System.IO.Path.GetFileName(fileDialog.FileName);
+                FixTimeManualDateTaken = PhotoProcessor.GetPhotoDateTaken(fileDialog.FileName);
+
+                FixTimeManualDateTime.Value = FixTimeManualDateTaken;
+            }
+        }
+
     }
 }

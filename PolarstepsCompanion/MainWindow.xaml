@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:PolarstepsCompanion"
         mc:Ignorable="d"
         Title="Polarsteps Companion App" Height="450" Width="800"
-    xmlns:System="clr-namespace:System;assembly=System.Runtime">
+    xmlns:System="clr-namespace:System;assembly=System.Runtime"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit">
     <Window.Resources>
         <local:ImageConverter x:Key="ImageConverter"  />
     </Window.Resources>
@@ -43,21 +44,44 @@
                 <TextBlock Margin="10,10,10,0" Text=" Sometimes, time and date of your camera weren't set properly. You can fix it here. &#x0a; You can load a pair of pictures taken at the same time - one from your camera and one with proper time (e.g. from your phone). &#x0a; Capture time of the camera photo will be shifted to match capture time of the exemplary photo. &#x0a; Or alternatively you can select the time of the photo manually. &#x0a; All your other photos' time will be shifted by the same amount."  TextWrapping="Wrap" VerticalAlignment="Top" Height="96" Background="#FFD6D6D6"/>
                 <Grid Margin="10,111,10,10">
                     <TextBlock HorizontalAlignment="Left" Text="Would you like to fix the time and date of your images?" TextWrapping="Wrap" VerticalAlignment="Top" Height="19" Width="315"/>
-                    <RadioButton x:Name="FixTimeNoButton" Content="Don't fix the time" HorizontalAlignment="Left" Margin="320,2,0,0" VerticalAlignment="Top" IsChecked="True"/>
-                    <RadioButton x:Name="FixTimeYesButton" Content="Fix using two photos" HorizontalAlignment="Left" Margin="436,2,0,0" VerticalAlignment="Top"/>
-                    <RadioButton Content="Fix by manually selecting the time" HorizontalAlignment="Left" Margin="570,2,0,0" VerticalAlignment="Top"/>
-                    <Grid x:Name="FixTimeTwoPhotosGrid" Margin="0,24,0,0">
+                    <RadioButton x:Name="FixTimeNoButton" Content="Don't fix the time" HorizontalAlignment="Left" Margin="320,2,0,0" VerticalAlignment="Top" IsChecked="True" Checked="FixTimeNoButton_Checked"/>
+                    <RadioButton x:Name="FixTimeCameraButton" Content="Fix using two photos" HorizontalAlignment="Left" Margin="436,2,0,0" VerticalAlignment="Top" Checked="FixTimeCameraButton_Checked"/>
+                    <RadioButton x:Name="FixTimeManualButton" Content="Fix by manually selecting the time" HorizontalAlignment="Left" Margin="570,2,0,0" VerticalAlignment="Top" Checked="FixTimeManualButton_Checked"/>
+                    <Grid x:Name="FixTimePhotosGrid" Margin="0,24,0,0" Visibility="Collapsed">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Column="0">
-                            <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Text="Load Sample Photo" TextWrapping="Wrap" VerticalAlignment="Top"/>
-                            <Button Content="Browse" HorizontalAlignment="Left" Margin="118,8,0,0" VerticalAlignment="Top" Width="97"/>
+                            <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Text="Load Sample Camera Photo" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                            <Button x:Name="FixTimeCameraBrowse" Content="Browse" HorizontalAlignment="Left" Margin="162,8,0,0" VerticalAlignment="Top" Width="97" Click="FixTimeCameraBrowse_Click"/>
+                            <TextBlock Text="{Binding FixTimeCameraFilename}" Margin="10,35,10,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                            <TextBlock Text="{Binding FixTimeCameraDateTakenString}" HorizontalAlignment="Left" Margin="10,60,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="367"/>
+                            <Image x:Name="FixTimeCameraPreview" Margin="10,85,10,0" Source="{Binding FixTimeCameraPhotoPath}" VerticalAlignment="Top"/>
                         </Grid>
                         <Grid Grid.Column="1">
-                            <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Text="Load Exemplary Photo (with proper time)" TextWrapping="Wrap" VerticalAlignment="Top"/>
-                            <Button Content="Browse" HorizontalAlignment="Left" Margin="232,8,0,0" VerticalAlignment="Top" Width="97"/>
+                            <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Text="Load Sample Camera Photo" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                            <Button x:Name="FixTimePhoneBrowse" Content="Browse" HorizontalAlignment="Left" Margin="162,8,0,0" VerticalAlignment="Top" Width="97" Click="FixTimePhotoBrowse_Click"/>
+                            <TextBlock Text="{Binding FixTimePhotoDateTakenString}" HorizontalAlignment="Left" Margin="10,35,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="367"/>
+                            <TextBlock Text="{Binding FixTimePhotoFilename}" Margin="10,60,10,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                            <Image x:Name="FixTimePhonePreview" Margin="10,85,10,0" Source="{Binding FixTimePhotoPhotoPath}" VerticalAlignment="Top"/>
+                        </Grid>
+                    </Grid>
+                    <Grid x:Name="FixTimeManualGrid" Margin="0,24,0,0" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid Grid.Column="0">
+                            <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Text="Load Sample Camera Photo" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                            <Button x:Name="FixTimeManualBrowse" Content="Browse" HorizontalAlignment="Left" Margin="162,8,0,0" VerticalAlignment="Top" Width="97" Click="FixTimeManualBrowse_Click"/>
+                            <TextBlock Text="{Binding FixTimeManualDateTakenString}" HorizontalAlignment="Left" Margin="10,35,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="367"/>
+                            <TextBlock Text="{Binding FixTimeManualFilename}" Margin="10,60,10,0" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                            <Image x:Name="FixTimeManualPreview" Margin="10,85,10,0" Source="{Binding FixTimeManualPhotoPath}" VerticalAlignment="Top"/>
+                        </Grid>
+                        <Grid Grid.Column="1">
+                            <TextBlock HorizontalAlignment="Center" Margin="0,10,0,0" Text="Select correct time for this photo:" TextWrapping="Wrap" VerticalAlignment="Top" Width="367"/>
+                            <xctk:DateTimePicker x:Name="FixTimeManualDateTime" Margin="10,31,0,0" Height="22" VerticalAlignment="Top" HorizontalAlignment="Left" Width="320" />
                         </Grid>
                     </Grid>
                 </Grid>
