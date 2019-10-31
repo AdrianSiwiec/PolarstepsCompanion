@@ -28,7 +28,6 @@ namespace PolarstepsCompanion
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
 
-        static public string[] PhotoExtensions = { ".JPG", ".JPEG", ".NEF" };
         static public readonly string PhotoExtensionsString = "Photos|*.jpg;*.jpeg;*.nef";
 
         private PolarstepsProcessor polarstepsProcessor;
@@ -46,7 +45,7 @@ namespace PolarstepsCompanion
         }
 
 
-        private void RaisePropertyChanged(string propName)
+        public void RaisePropertyChanged(string propName)
         {
             if (PropertyChanged != null)
             {
@@ -121,30 +120,22 @@ namespace PolarstepsCompanion
             {
                 PhotosPath = fileDialog.FileName;
 
-                ObservableCollection<ImagePreviewClass> images = new ObservableCollection<ImagePreviewClass>();
+                PhotoProcessor processor = new PhotoProcessor(fileDialog.FileName, this);
 
+                ImagePreviewDataGrid.ItemsSource = processor.Images;
+                PreviewDataGrid.ItemsSource = processor.Images;
 
-                //var imagePaths = System.IO.Directory.EnumerateFiles(fileDialog.FileName, "*", System.IO.SearchOption.AllDirectories).
-                //    Where(f => PhotoExtensions.Contains(System.IO.Path.GetExtension(f), StringComparer.InvariantCultureIgnoreCase));
-
-                var imagePaths = System.IO.Directory.EnumerateFiles(fileDialog.FileName, "*.JPG", System.IO.SearchOption.AllDirectories);
-
-                foreach (string image in imagePaths)
-                {
-                    images.Add(new ImagePreviewClass(fileDialog.FileName, image));
-                }
-
-                ImagePreviewDataGrid.ItemsSource = images;
-                //PreviewDataGrid.ItemsSource = images;
-
-                PhotosLoadedInfo.Text = $"{images.Count} photos loaded succesfully.";
+                PhotosLoadedInfo.Text = $"{processor.Images.Count} photos loaded succesfully.";
                 RaisePropertyChanged("PhotosLoadedInfo");
 
                // new Thread(() =>
-               //Parallel.For(0, images.Count, i =>
                //{
-               //    images[i].Process();
-               //})).Start();
+               //    Parallel.For(0, images.Count, i =>
+               //  {
+               //      images[i].Process();
+               //  });
+               //    Trace.WriteLine("Processing thread done");
+               //}).Start();
             }
         }
 
@@ -555,7 +546,7 @@ namespace PolarstepsCompanion
 
             if (fileDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                if (string.Compare(fileDialog.FileName, PhotosPath, StringComparison.InvariantCultureIgnoreCase) == 0)
+                if (fileDialog.FileName.Contains(PhotosPath, StringComparison.InvariantCultureIgnoreCase))
                 {
                     OutputDirectoryPath = "Output directory should be different to selected photos directory.";
                     OutputIsDirectoryValid = false;

@@ -17,7 +17,7 @@
                 <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Text="Select directory containing your photos:" TextWrapping="Wrap" VerticalAlignment="Top"/>
                 <Button x:Name="SelectPhotosDir" Content="Browse" HorizontalAlignment="Left" Margin="226,8,0,0" VerticalAlignment="Top" Width="74" Click="SelectPhotosDir_Click"/>
                 <TextBlock HorizontalAlignment="Left" Margin="305,10,0,0" Text="{Binding PhotosPath}" TextWrapping="Wrap" VerticalAlignment="Top" Width="479"/>
-                <DataGrid EnableRowVirtualization="True" ScrollViewer.CanContentScroll="False" Name="ImagePreviewDataGrid" Margin="10,38,10,38" AutoGenerateColumns="False" SelectionChanged="ImagePreviewDataGrid_SelectionChanged">
+                <DataGrid EnableRowVirtualization="True" Name="ImagePreviewDataGrid" Margin="10,38,10,38" AutoGenerateColumns="False" SelectionChanged="ImagePreviewDataGrid_SelectionChanged">
                     <DataGrid.Columns>
                         <DataGridTextColumn x:Name="FilenameColumn" CanUserSort="False" Header="Filename" Binding="{Binding ImagePreviewFilename}" IsReadOnly="True"/>
                         <DataGridTemplateColumn Header="Preview">
@@ -29,14 +29,15 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+                        <DataGridTextColumn x:Name="DateTakenColumn" CanUserSort="False" Header="Date Taken" Binding="{Binding ImagePreviewDateTaken}"/>
                     </DataGrid.Columns>
                 </DataGrid>
-                <TextBlock Name="PhotosLoadedInfo" Margin="10,0,10,10" Text="No photos loaded yet." TextWrapping="Wrap" Height="16" VerticalAlignment="Bottom"/>
-                <!--<ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Grid Margin="0,2" />
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>-->
+                <TextBlock Name="PhotosLoadedInfo" Margin="10,0,0,10" Text="No photos loaded yet." TextWrapping="Wrap" Height="16" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="131"/>
+                <TextBlock HorizontalAlignment="Left" Margin="146,0,0,10" Text="Preprocessing progress: " TextWrapping="Wrap" Height="16" VerticalAlignment="Bottom"/>
+                <Grid Height="16" Margin="280,0,10,10" VerticalAlignment="Bottom">
+                    <ProgressBar x:Name="PhotosLoadedPreprocessingBar"  />
+                    <TextBlock x:Name="PhotosLoadedPreprocessingText" Text="" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Grid>
             </Grid>
         </TabItem>
         <TabItem Header="2. Fix time in your photos">
@@ -112,7 +113,7 @@
                 <RadioButton Content="No" IsChecked="True" HorizontalAlignment="Left" Margin="218,53,0,0" VerticalAlignment="Top"/>
                 <RadioButton Content="Yes" HorizontalAlignment="Left" Margin="258,53,0,0" VerticalAlignment="Top"/>
 
-                <DataGrid ScrollViewer.CanContentScroll="False" Name="PreviewDataGrid" Margin="10,103,10,38" AutoGenerateColumns="False" SelectionChanged="ImagePreviewDataGrid_SelectionChanged">
+                <DataGrid Name="PreviewDataGrid" Margin="10,103,10,38" AutoGenerateColumns="False" SelectionChanged="ImagePreviewDataGrid_SelectionChanged">
                     <DataGrid.Columns>
                         <DataGridTextColumn x:Name="PreviewFilenameColumn" CanUserSort="False" Header="Filename" Binding="{Binding ImagePreviewFilename}" IsReadOnly="True"/>
                         <DataGridTemplateColumn Header="Preview">
@@ -124,6 +125,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
+                        <DataGridTextColumn x:Name="PreviewDateTakenColumn" CanUserSort="False" Header="Date Taken" Binding="{Binding ImagePreviewDateTaken}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>

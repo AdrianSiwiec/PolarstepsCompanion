@@ -7,7 +7,7 @@ namespace PolarstepsCompanion
 {
     public partial class MainWindow
     {
-        class ImagePreviewClass
+        public class ImagePreviewClass
         {
             private string imagePreviewFilename;
             private string imagePreviewPath;
