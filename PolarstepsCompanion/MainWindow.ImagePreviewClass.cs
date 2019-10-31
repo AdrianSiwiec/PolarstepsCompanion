@@ -1,5 +1,7 @@
 ﻿using MetadataExtractor;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PolarstepsCompanion
 {
@@ -9,7 +11,7 @@ namespace PolarstepsCompanion
         {
             private string imagePreviewFilename;
             private string imagePreviewPath;
-            private string imagePreviewDateTaken;
+            private DateTime? imagePreviewDateTaken;
 
             public ImagePreviewClass(string rootDir, string path)
             {
@@ -20,7 +22,12 @@ namespace PolarstepsCompanion
 
             public string ImagePreviewFilename { get => imagePreviewFilename; set => imagePreviewFilename = value; }
             public string ImagePreviewPath { get => imagePreviewPath; set => imagePreviewPath = value; }
-            public string ImagePreviewDateTaken { get => imagePreviewDateTaken; set => imagePreviewDateTaken = value; }
+            public DateTime? ImagePreviewDateTaken { get => imagePreviewDateTaken; set => imagePreviewDateTaken = value; }
+
+            internal void Process()
+            {
+                ImagePreviewDateTaken = PhotoProcessor.GetPhotoDateTaken(ImagePreviewPath);
+            }
         }
     }
 }

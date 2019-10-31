@@ -17,7 +17,7 @@
                 <TextBlock HorizontalAlignment="Left" Margin="10,10,0,0" Text="Select directory containing your photos:" TextWrapping="Wrap" VerticalAlignment="Top"/>
                 <Button x:Name="SelectPhotosDir" Content="Browse" HorizontalAlignment="Left" Margin="226,8,0,0" VerticalAlignment="Top" Width="74" Click="SelectPhotosDir_Click"/>
                 <TextBlock HorizontalAlignment="Left" Margin="305,10,0,0" Text="{Binding PhotosPath}" TextWrapping="Wrap" VerticalAlignment="Top" Width="479"/>
-                <DataGrid ScrollViewer.CanContentScroll="False" Name="ImagePreviewDataGrid" Margin="10,38,10,38" AutoGenerateColumns="False" SelectionChanged="ImagePreviewDataGrid_SelectionChanged">
+                <DataGrid EnableRowVirtualization="True" ScrollViewer.CanContentScroll="False" Name="ImagePreviewDataGrid" Margin="10,38,10,38" AutoGenerateColumns="False" SelectionChanged="ImagePreviewDataGrid_SelectionChanged">
                     <DataGrid.Columns>
                         <DataGridTextColumn x:Name="FilenameColumn" CanUserSort="False" Header="Filename" Binding="{Binding ImagePreviewFilename}" IsReadOnly="True"/>
                         <DataGridTemplateColumn Header="Preview">

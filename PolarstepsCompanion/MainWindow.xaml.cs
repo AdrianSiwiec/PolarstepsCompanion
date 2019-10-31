@@ -124,8 +124,10 @@ namespace PolarstepsCompanion
                 ObservableCollection<ImagePreviewClass> images = new ObservableCollection<ImagePreviewClass>();
 
 
-                var imagePaths = System.IO.Directory.EnumerateFiles(fileDialog.FileName, "*", System.IO.SearchOption.AllDirectories).
-                    Where(f => PhotoExtensions.Contains(System.IO.Path.GetExtension(f), StringComparer.InvariantCultureIgnoreCase));
+                //var imagePaths = System.IO.Directory.EnumerateFiles(fileDialog.FileName, "*", System.IO.SearchOption.AllDirectories).
+                //    Where(f => PhotoExtensions.Contains(System.IO.Path.GetExtension(f), StringComparer.InvariantCultureIgnoreCase));
+
+                var imagePaths = System.IO.Directory.EnumerateFiles(fileDialog.FileName, "*.JPG", System.IO.SearchOption.AllDirectories);
 
                 foreach (string image in imagePaths)
                 {
@@ -133,10 +135,16 @@ namespace PolarstepsCompanion
                 }
 
                 ImagePreviewDataGrid.ItemsSource = images;
-                PreviewDataGrid.ItemsSource = images;
+                //PreviewDataGrid.ItemsSource = images;
 
                 PhotosLoadedInfo.Text = $"{images.Count} photos loaded succesfully.";
                 RaisePropertyChanged("PhotosLoadedInfo");
+
+               // new Thread(() =>
+               //Parallel.For(0, images.Count, i =>
+               //{
+               //    images[i].Process();
+               //})).Start();
             }
         }
 
