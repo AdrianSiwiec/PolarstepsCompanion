@@ -20,7 +20,7 @@
                 <DataGrid EnableRowVirtualization="True" Name="ImagePreviewDataGrid" Margin="10,38,10,38" AutoGenerateColumns="False" SelectionChanged="ImagePreviewDataGrid_SelectionChanged">
                     <DataGrid.Columns>
                         <DataGridTextColumn x:Name="FilenameColumn" CanUserSort="False" Header="Filename" Binding="{Binding ImagePreviewFilename}" IsReadOnly="True"/>
-                        <DataGridTemplateColumn Header="Preview">
+                        <DataGridTemplateColumn Header="Preview" MaxWidth="300">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Image HorizontalAlignment="Center" 
@@ -29,7 +29,7 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn x:Name="DateTakenColumn" CanUserSort="False" Header="Date Taken" Binding="{Binding ImagePreviewDateTaken}"/>
+                        <DataGridTextColumn x:Name="DateTakenColumn" CanUserSort="False" Header="Date Taken" Binding="{Binding ImagePreviewDateTaken}" IsReadOnly="True"/>
                     </DataGrid.Columns>
                 </DataGrid>
                 <TextBlock Name="PhotosLoadedInfo" Margin="10,0,0,10" Text="No photos loaded yet." TextWrapping="Wrap" Height="16" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="131"/>
@@ -89,48 +89,72 @@
                 </Grid>
             </Grid>
         </TabItem>
-        <TabItem Header="3. Select Polarsteps directory" Margin="-3,-2,-1,0">
+        <TabItem Header="3. Select Polarsteps directory">
             <Grid Background="#FFFFFF">
-                <TextBlock Margin="10,10,10,0" Text=" Select a directory containing your Polarsteps data. You can download your data from Polarsteps website. &#x0a; After extracting downloaded data, the directory is usually named $NAME$. &#x0a; It should contain directories named 'trip' and 'user'."  TextWrapping="Wrap" VerticalAlignment="Top" Height="52" Background="#FFD6D6D6"/>
-                <TextBlock Text="Load Polarsteps directory" TextWrapping="Wrap" Width="138" VerticalAlignment="Top" Margin="10,70,0,0" HorizontalAlignment="Left"/>
-                <TextBlock Text="Select trip to process" TextWrapping="Wrap" Width="138" IsEnabled="{Binding PolarstepsCBIsEnabled}" VerticalAlignment="Top" Margin="10,105,0,0" HorizontalAlignment="Left"/>
-                <Button Content="Browse" Click="Button_Click_Polarsteps_Dir" Height="23" Width="74" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="183,67,0,0"/>
-                <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsValidDirectory}" VerticalAlignment="Top" Margin="158,71,0,0" HorizontalAlignment="Left"/>
-                <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsTripSelected}" VerticalAlignment="Top" Margin="158,106,0,0" HorizontalAlignment="Left"/>
-                <ComboBox ItemsSource="{Binding PolarstepsCBItems}" SelectedItem="{Binding PolarstepsCBSelectedItem}" IsEnabled="{Binding PolarstepsCBIsEnabled}" SelectionChanged="ComboBox_SelectionChanged" Margin="183,101,0,0" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" Width="182"/>
-                <TextBlock Margin="262,70,10,0" Text="{Binding PolarstepsDirectoryPath}" TextWrapping="Wrap" VerticalAlignment="Top"/>
-                <Button x:Name="PolarstepsStartProcessing" Content="Process!" HorizontalAlignment="Left" Margin="111,183,0,0" VerticalAlignment="Top" Width="94" Click="PolarstepsStartProcessing_Click"/>
+                <TextBlock Margin="10,10,10,0" Text=" Select a directory containing your Polarsteps data. You can download your data from Polarsteps website. &#x0a; To download the data, log into your Polarsteps account on a PC, then go to Options, Account Settings, Download My Data. &#x0a; Extract the archive to a new directory then select this directory below. &#x0a; It should contain directories named 'trip' and 'user'."  TextWrapping="Wrap" VerticalAlignment="Top" Height="75" Background="#FFD6D6D6"/>
+                <Grid Margin="0,90,0,0">
+                    <TextBlock Text="Load Polarsteps directory" TextWrapping="Wrap" Width="138" VerticalAlignment="Top" Margin="10,10,0,0" HorizontalAlignment="Left"/>
+                    <TextBlock Text="Select trip to process" TextWrapping="Wrap" Width="138" IsEnabled="{Binding PolarstepsCBIsEnabled}" VerticalAlignment="Top" Margin="10,44,0,0" HorizontalAlignment="Left"/>
+                    <Button Content="Browse" Click="Button_Click_Polarsteps_Dir" Height="23" Width="74" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="184,6,0,0"/>
+                    <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsValidDirectory}" VerticalAlignment="Top" Margin="159,11,0,0" HorizontalAlignment="Left"/>
+                    <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsTripSelected}" VerticalAlignment="Top" Margin="159,44,0,0" HorizontalAlignment="Left"/>
+                    <ComboBox ItemsSource="{Binding PolarstepsCBItems}" SelectedItem="{Binding PolarstepsCBSelectedItem}" IsEnabled="{Binding PolarstepsCBIsEnabled}" SelectionChanged="ComboBox_SelectionChanged" Margin="184,40,0,0" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" Width="182"/>
+                    <TextBlock Margin="262,10,10,0" Text="{Binding PolarstepsDirectoryPath}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                </Grid>
             </Grid>
         </TabItem>
-        <TabItem Header="4. Preview the changes" Margin="-3,-2,-1,0">
+        <TabItem Header="4. Preview the changes">
             <Grid Background="#FFFFFF">
                 <TextBlock Margin="10,10,10,0" Text=" Sometimes, when you copy photos from multiple directories, their order gets lost. &#x0a; You can rename the photos here, using format: YYYY.MM.DD.HH.MM.SS.[old name] "  TextWrapping="Wrap" VerticalAlignment="Top" Height="37" Background="#FFD6D6D6"/>
-                <TextBlock HorizontalAlignment="Left" Margin="10,52,0,0" Text="Would you like to rename the photos?" TextWrapping="Wrap" VerticalAlignment="Top"/>
-                <TextBlock HorizontalAlignment="Left" Margin="10,80,0,0" Text="Select output directory." TextWrapping="Wrap" VerticalAlignment="Top" Width="136"/>
-                <Button x:Name="OutputDirectoryButton" Content="Browse" HorizontalAlignment="Left" Margin="180,78,0,0" VerticalAlignment="Top" Width="71" Click="OutputDirectoryButton_Click"/>
-                <TextBlock Margin="256,80,10,0" Text="{Binding OutputDirectoryPath}" TextWrapping="Wrap" VerticalAlignment="Top"/>
-                <CheckBox Content="" IsEnabled="False" HorizontalAlignment="Left" Margin="140,81,0,0" VerticalAlignment="Top" IsChecked="{Binding OutputIsDirectoryValid}"/>
-                <RadioButton Content="No" IsChecked="True" HorizontalAlignment="Left" Margin="218,53,0,0" VerticalAlignment="Top"/>
-                <RadioButton Content="Yes" HorizontalAlignment="Left" Margin="258,53,0,0" VerticalAlignment="Top"/>
+                <Grid>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,52,0,0" Text="Would you like to rename the photos?" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                    <RadioButton x:Name="OutputRenameNo" Content="No" IsChecked="True" HorizontalAlignment="Left" Margin="218,53,0,0" VerticalAlignment="Top" Checked="OutputRename_Checked"/>
+                    <RadioButton x:Name="OutputRenameYes" Content="Yes" HorizontalAlignment="Left" Margin="258,53,0,0" VerticalAlignment="Top" Checked="OutputRename_Checked"/>
+                </Grid>
+                <Grid>
+                    <TextBlock HorizontalAlignment="Left" Margin="10,72,0,0" Text="Would you like to overwrite the photos or save a copy?" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                    <RadioButton x:Name="OutputOverwriteNo" Content="Make a copy (slower)" HorizontalAlignment="Left" Margin="393,73,0,0" VerticalAlignment="Top" Checked="OutputOverwrite_Checked"/>
+                    <RadioButton x:Name="OutputOverwriteYes" Content="Overwrite" HorizontalAlignment="Left" Margin="318,73,0,0" VerticalAlignment="Top" IsChecked="True" Checked="OutputOverwrite_Checked"/>
+                </Grid>
+                <Grid x:Name="OutputDirectoryGrid" Margin="10,72,0,0" Height="48" VerticalAlignment="Top" Visibility="Hidden">
+                    <TextBlock HorizontalAlignment="Left" Margin="10,20,0,0" Text="Select output directory." TextWrapping="Wrap" VerticalAlignment="Top" Width="136"/>
+                    <Button x:Name="OutputDirectoryButton" Content="Browse" HorizontalAlignment="Left" Margin="180,18,0,0" VerticalAlignment="Top" Width="71" Click="OutputDirectoryButton_Click"/>
+                    <TextBlock Margin="256,20,10,0" Text="{Binding OutputDirectoryPath}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                    <CheckBox Content="" IsEnabled="False" HorizontalAlignment="Left" Margin="140,21,0,0" VerticalAlignment="Top" IsChecked="{Binding OutputIsDirectoryValid}"/>
+                </Grid>
 
-                <DataGrid Name="PreviewDataGrid" Margin="10,103,10,38" AutoGenerateColumns="False" SelectionChanged="ImagePreviewDataGrid_SelectionChanged">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn x:Name="PreviewFilenameColumn" CanUserSort="False" Header="Filename" Binding="{Binding ImagePreviewFilename}" IsReadOnly="True"/>
-                        <DataGridTemplateColumn Header="Preview">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Image HorizontalAlignment="Center" 
+                <Grid Margin="10,120,10,38">
+                    <DataGrid Name="PreviewDataGrid"  AutoGenerateColumns="False" SelectionChanged="ImagePreviewDataGrid_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn x:Name="PreviewFilenameColumn" CanUserSort="False" Header="Filename" Binding="{Binding ImagePreviewFilename}" IsReadOnly="True"/>
+                            <DataGridTemplateColumn Header="Preview" MaxWidth="300">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Image HorizontalAlignment="Center" 
                                            Source="{Binding ImagePreviewPath,
                                         Converter={StaticResource ImageConverter}}" Height="{DynamicResource PreviewImageHeight}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn x:Name="PreviewDateTakenColumn" CanUserSort="False" Header="Date Taken" Binding="{Binding ImagePreviewDateTaken}"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn x:Name="PreviewDateTakenColumn" CanUserSort="False" Header="Date Taken" Binding="{Binding ImagePreviewDateTaken}" IsReadOnly="True"/>
+                            <DataGridTextColumn x:Name="PreviewDateFixedColumn" CanUserSort="False" Header="Date Taken Fixed" Binding="{Binding ImagePreviewDateFixed}" IsReadOnly="True"/>
+                            <DataGridHyperlinkColumn Header="Calculated Location" Binding="{Binding LocationMapsLink}" ContentBinding="{Binding ClickText}">
+                                <DataGridHyperlinkColumn.ElementStyle>
+                                    <Style>
+                                        <EventSetter Event="Hyperlink.Click" Handler="DG_Hyperlink_Click"/>
+                                    </Style>
+                                </DataGridHyperlinkColumn.ElementStyle>
+                            </DataGridHyperlinkColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+
+                <Grid Margin="10,0,10,10" VerticalAlignment="Bottom">
+                    <Button x:Name="StartProcessingButton" Content="Go!" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="60" Click="StartProcessing_Click"/>
+                </Grid>
             </Grid>
         </TabItem>
-        <TabItem Header="1. Select Photos Directory">
+        <TabItem Header="test">
             <Grid Background="#FFFFFF">
                 <TextBlock HorizontalAlignment="Left" Text="Load Image to show Exif info" TextWrapping="Wrap" VerticalAlignment="Top" Height="27" Width="232" Cursor="Arrow"/>
                 <Button Content="Browse" HorizontalAlignment="Left" Margin="232,0,0,0" VerticalAlignment="Top" Click="Button_Click_1"/>

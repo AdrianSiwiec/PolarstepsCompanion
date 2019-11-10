@@ -124,7 +124,7 @@ namespace PolarstepsCompanion
 
         internal PolarstepsTrip SelectedTrip { get; private set; }
         private bool isTripProcessed = false;
-        internal bool IsTripProcessed { get => isTripProcessed; private set => isTripProcessed = value; }
+        internal bool IsTripProcessed { get => isTripProcessed; set => isTripProcessed = value; }
         private LocationsProcessor locationsProcessor;
 
         public bool IsValidDirectory

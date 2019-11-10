@@ -47,10 +47,7 @@ namespace PolarstepsCompanion
 
         public void RaisePropertyChanged(string propName)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -118,6 +115,7 @@ namespace PolarstepsCompanion
 
             if (fileDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
+                SelectPhotosDir.IsEnabled = false;
                 PhotosPath = fileDialog.FileName;
 
                 PhotoProcessor processor = new PhotoProcessor(fileDialog.FileName, this);
@@ -127,21 +125,15 @@ namespace PolarstepsCompanion
 
                 PhotosLoadedInfo.Text = $"{processor.Images.Count} photos loaded succesfully.";
                 RaisePropertyChanged("PhotosLoadedInfo");
-
-               // new Thread(() =>
-               //{
-               //    Parallel.For(0, images.Count, i =>
-               //  {
-               //      images[i].Process();
-               //  });
-               //    Trace.WriteLine("Processing thread done");
-               //}).Start();
             }
+
+            ValidateOutputDirectory();
         }
 
         private void ImagePreviewDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ImagePreviewDataGrid.UnselectAllCells();
+            PreviewDataGrid.UnselectAllCells();
         }
 
         //Fix Time Tab
@@ -296,6 +288,7 @@ namespace PolarstepsCompanion
 
                 RaisePropertyChanged("FixTimePhotosGrid");
                 RaisePropertyChanged("FixTimeManualGrid");
+
             }
         }
 
@@ -404,6 +397,8 @@ namespace PolarstepsCompanion
                     FixTimeTimeSpanMessage = "Your photos will be shifted by: " + Commons.TimeSpanPretty(value.Value);
                 else
                     FixTimeTimeSpanMessage = "";
+
+                PreviewDataGrid?.Items?.Refresh();
             }
         }
 
@@ -501,17 +496,15 @@ namespace PolarstepsCompanion
             if (e.AddedItems.Count > 0)
             {
                 polarstepsProcessor.TripSelected(e.AddedItems[0]);
-                PolarstepsIsTripSelected = polarstepsProcessor.SelectedTrip != null;
-            }
-        }
+                polarstepsProcessor.IsTripProcessed = false;
 
-        private void PolarstepsStartProcessing_Click(object sender, RoutedEventArgs e)
-        {
-            if (PolarstepsIsValidDirectory && PolarstepsIsTripSelected)
-            {
+                PolarstepsIsTripSelected = polarstepsProcessor.SelectedTrip != null;
+
                 polarstepsProcessor.Process();
             }
         }
+
+
 
         // Output tab
 
@@ -546,17 +539,66 @@ namespace PolarstepsCompanion
 
             if (fileDialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                if (fileDialog.FileName.Contains(PhotosPath, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    OutputDirectoryPath = "Output directory should be different to selected photos directory.";
-                    OutputIsDirectoryValid = false;
-                }
-                else
-                {
-                    OutputDirectoryPath = fileDialog.FileName;
-                    OutputIsDirectoryValid = true;
-                }
+                OutputDirectoryPath = fileDialog.FileName;
+                OutputIsDirectoryValid = true;
+
+                ValidateOutputDirectory();
             }
+
+        }
+
+        private void ValidateOutputDirectory()
+        {
+            if (OutputDirectoryPath != null && OutputDirectoryPath.Contains(PhotosPath, StringComparison.InvariantCultureIgnoreCase))
+            {
+                OutputDirectoryPath = "Output directory should be different to selected photos directory.";
+                OutputIsDirectoryValid = false;
+            }
+        }
+
+        private bool OutputRename = false;
+
+        private void OutputRename_Checked(object sender, RoutedEventArgs e)
+        {
+            if (OutputRenameYes?.IsChecked == true)
+                OutputRename = true;
+            else
+                OutputRename = false;
+        }
+
+        private bool OutputOverwrite = false;
+
+        private void OutputOverwrite_Checked(object sender, RoutedEventArgs e)
+        {
+            if (OutputOverwriteYes?.IsChecked == true)
+                OutputOverwrite = true;
+            else
+                OutputOverwrite = false;
+
+            if (OutputDirectoryGrid != null)
+            {
+                if (OutputOverwrite)
+                    OutputDirectoryGrid.Visibility = Visibility.Hidden;
+                else
+                    OutputDirectoryGrid.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void StartProcessing_Click(object sender, RoutedEventArgs e)
+        {
+            if (PolarstepsIsValidDirectory && PolarstepsIsTripSelected)
+            {
+                polarstepsProcessor.Process();
+            }
+        }
+
+        private void DG_Hyperlink_Click(object sender, RoutedEventArgs e)
+        {
+            Hyperlink hyperlink = (Hyperlink)e.OriginalSource;
+            //System.Diagnostics.Process.Start(hyperlink.NavigateUri.AbsoluteUri);
+            Trace.WriteLine(hyperlink.NavigateUri.AbsoluteUri);
+            BrowserWindow browserWindow = new BrowserWindow(hyperlink.NavigateUri.AbsoluteUri);
+            browserWindow.Show();
         }
     }
 }

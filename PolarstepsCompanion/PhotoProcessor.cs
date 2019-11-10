@@ -28,7 +28,7 @@ namespace PolarstepsCompanion
 
             foreach (string image in imagePaths)
             {
-                Images.Add(new MainWindow.ImagePreviewClass(directory, image));
+                Images.Add(new MainWindow.ImagePreviewClass(directory, image, mainWindow));
             }
 
             backgroundWorker = new BackgroundWorker { WorkerReportsProgress = true };
@@ -62,7 +62,7 @@ namespace PolarstepsCompanion
             {
                 for (int i = 0; i < images.Count; i++)
                 {
-                    images[i].Process();
+                    images[i].Preprocess();
                     backgroundWorker.ReportProgress(((i * 100 + 1)) / images.Count);
                 }
 
