@@ -137,7 +137,7 @@ namespace PolarstepsCompanion
             get;
             private set;
         }
-
+        
         public PolarstepsProcessor(string polarstepsMainDir)
         {
             this.polarstepsMainDir = polarstepsMainDir;

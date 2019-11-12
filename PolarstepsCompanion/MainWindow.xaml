@@ -151,6 +151,10 @@
 
                 <Grid Margin="10,0,10,10" VerticalAlignment="Bottom">
                     <Button x:Name="StartProcessingButton" Content="Go!" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="60" Click="StartProcessing_Click"/>
+                    <Grid  Margin="65,0,0,0">
+                        <ProgressBar x:Name="FinalProcessingProgressBar"  />
+                        <TextBlock x:Name="FinalProcessingProgressBarText" Text="" HorizontalAlignment="Center"/>
+                    </Grid>
                 </Grid>
             </Grid>
         </TabItem>

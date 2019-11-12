@@ -31,6 +31,7 @@ namespace PolarstepsCompanion
         static public readonly string PhotoExtensionsString = "Photos|*.jpg;*.jpeg;*.nef";
 
         private PolarstepsProcessor polarstepsProcessor;
+        private PhotoProcessor photoProcessor;
         public MainWindow()
         {
             InitializeComponent();
@@ -118,12 +119,12 @@ namespace PolarstepsCompanion
                 SelectPhotosDir.IsEnabled = false;
                 PhotosPath = fileDialog.FileName;
 
-                PhotoProcessor processor = new PhotoProcessor(fileDialog.FileName, this);
+                photoProcessor = new PhotoProcessor(fileDialog.FileName, this);
 
-                ImagePreviewDataGrid.ItemsSource = processor.Images;
-                PreviewDataGrid.ItemsSource = processor.Images;
+                ImagePreviewDataGrid.ItemsSource = photoProcessor.Images;
+                PreviewDataGrid.ItemsSource = photoProcessor.Images;
 
-                PhotosLoadedInfo.Text = $"{processor.Images.Count} photos loaded succesfully.";
+                PhotosLoadedInfo.Text = $"{photoProcessor.Images.Count} photos loaded succesfully.";
                 RaisePropertyChanged("PhotosLoadedInfo");
             }
 
@@ -586,19 +587,32 @@ namespace PolarstepsCompanion
 
         private void StartProcessing_Click(object sender, RoutedEventArgs e)
         {
-            if (PolarstepsIsValidDirectory && PolarstepsIsTripSelected)
+            if((polarstepsProcessor!= null && !polarstepsProcessor.IsTripProcessed) || !photoProcessor.IsPreprocessingDone)
             {
-                polarstepsProcessor.Process();
+                FinalProcessingProgressBarText.Text = "Preprocessing is not done yet. Try again when it is finished.";
+
+                return;
             }
+
+            if(OutputOverwriteYes.IsChecked != true && !OutputIsDirectoryValid)
+            {
+                FinalProcessingProgressBarText.Text = "To Continue, Select a valid output directory.";
+                return;
+            }
+
+            photoProcessor.DoFinalProcessing(OutputRenameYes.IsChecked, OutputOverwriteYes.IsChecked, OutputDirectoryPath);
         }
 
         private void DG_Hyperlink_Click(object sender, RoutedEventArgs e)
         {
             Hyperlink hyperlink = (Hyperlink)e.OriginalSource;
             //System.Diagnostics.Process.Start(hyperlink.NavigateUri.AbsoluteUri);
-            Trace.WriteLine(hyperlink.NavigateUri.AbsoluteUri);
-            BrowserWindow browserWindow = new BrowserWindow(hyperlink.NavigateUri.AbsoluteUri);
-            browserWindow.Show();
+            //Trace.WriteLine(hyperlink.NavigateUri.AbsoluteUri);
+            if (hyperlink.NavigateUri != null && hyperlink.NavigateUri.AbsoluteUri != null && !String.IsNullOrWhiteSpace(hyperlink.NavigateUri.AbsoluteUri))
+            {
+                BrowserWindow browserWindow = new BrowserWindow(hyperlink.NavigateUri.AbsoluteUri);
+                browserWindow.Show();
+            }
         }
     }
 }

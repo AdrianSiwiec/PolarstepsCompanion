@@ -1,4 +1,5 @@
 ﻿using MetadataExtractor;
+using ExifLibrary;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,7 +16,8 @@ namespace PolarstepsCompanion
         static private string[] PhotoExtensions = { ".JPG", ".JPEG", ".NEF" };
 
         private ObservableCollection<MainWindow.ImagePreviewClass> images;
-        private BackgroundWorker backgroundWorker;
+        private BackgroundWorker preprocessingBackgroundWorker;
+        private BackgroundWorker finalBackgroundWorker;
         private MainWindow mainWindow;
 
         public PhotoProcessor(string directory, MainWindow mainWindow)
@@ -31,46 +33,70 @@ namespace PolarstepsCompanion
                 Images.Add(new MainWindow.ImagePreviewClass(directory, image, mainWindow));
             }
 
-            backgroundWorker = new BackgroundWorker { WorkerReportsProgress = true };
-            backgroundWorker.DoWork += BackgroundWorker_DoWork;
-            backgroundWorker.ProgressChanged += BackgroundWorker_ProgressChanged;
-            backgroundWorker.RunWorkerCompleted += BackgroundWorker_RunWorkerCompleted;
+            preprocessingBackgroundWorker = new BackgroundWorker { WorkerReportsProgress = true };
+            preprocessingBackgroundWorker.DoWork += PreprocessingBackgroundWorker_DoWork;
+            preprocessingBackgroundWorker.ProgressChanged += PreprocessingBackgroundWorker_ProgressChanged;
+            preprocessingBackgroundWorker.RunWorkerCompleted += PreprocessingBackgroundWorker_RunWorkerCompleted;
+            preprocessingBackgroundWorker.RunWorkerAsync();
 
-            backgroundWorker.RunWorkerAsync();
+            finalBackgroundWorker = new BackgroundWorker { WorkerReportsProgress = true };
+            finalBackgroundWorker.DoWork += FinalBackgroundWorker_DoWork;
+            finalBackgroundWorker.ProgressChanged += FinalBackgroundWorker_ProgressChanged;
+            finalBackgroundWorker.RunWorkerCompleted += FinalBackgroundWorker_RunWorkerCompleted;
         }
 
-        private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void FinalBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void FinalBackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void FinalBackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void PreprocessingBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             mainWindow.PhotosLoadedPreprocessingBar.Value = 100;
             mainWindow.PhotosLoadedPreprocessingText.Text = "Done!";
 
             mainWindow.RaisePropertyChanged("ImagePreviewDateTaken");
             mainWindow.DateTakenColumn.Visibility = System.Windows.Visibility.Visible;
+            mainWindow.ImagePreviewDataGrid.Items.Refresh();
+            mainWindow.SelectPhotosDir.IsEnabled = true;
 
+            IsPreprocessingDone = true;
         }
 
-        private void BackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        private void PreprocessingBackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             Trace.WriteLine("Progress: " + e.ProgressPercentage);
             mainWindow.PhotosLoadedPreprocessingBar.Value = e.ProgressPercentage;
             mainWindow.PhotosLoadedPreprocessingText.Text = e.ProgressPercentage + "%";
         }
 
-        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        private void PreprocessingBackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             if (images != null)
             {
                 for (int i = 0; i < images.Count; i++)
                 {
                     images[i].Preprocess();
-                    backgroundWorker.ReportProgress(((i * 100 + 1)) / images.Count);
+                    preprocessingBackgroundWorker.ReportProgress(((i * 100 + 1)) / images.Count);
                 }
 
-                Trace.WriteLine("DONE WORKER " + images.Count);
             }
         }
 
         public ObservableCollection<MainWindow.ImagePreviewClass> Images { get => images; set => images = value; }
+        public bool IsPreprocessingDone { get => isPreprocessingDone; private set => isPreprocessingDone = value; }
+
+        private bool isPreprocessingDone = false;
 
         public static DateTime? GetPhotoDateTaken(string path)
         {
@@ -79,26 +105,20 @@ namespace PolarstepsCompanion
                 throw new ArgumentException("Bad photo path.", nameof(path));
             }
 
-            IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(path);
-            foreach (Directory dir in directories)
-            {
-                if (String.Compare(dir.Name, EXIF_IFD0_DIR, StringComparison.InvariantCultureIgnoreCase) == 0)
-                {
-                    foreach (Tag tag in dir.Tags)
-                    {
-                        if (String.Compare(tag.Name, "Date/Time", StringComparison.InvariantCultureIgnoreCase) == 0)
-                        {
-                            if (DateTime.TryParseExact(tag.Description, "yyyy:MM:dd HH:mm:ss",
-                            CultureInfo.CurrentCulture, DateTimeStyles.None, out DateTime dateTaken))
-                            {
-                                return dateTaken;
-                            }
-                        }
-                    }
-                }
-            }
+            ImageFile file = ImageFile.FromFile(path);
+            ExifDateTime dateTime = file.Properties.Get<ExifDateTime>(ExifTag.DateTime);
 
-            return null;
+            return dateTime;
+        }
+
+        public static void SaveFile(string inputDir, string inputFilename, bool changeName, bool overwrite, string outputDir, DataPoint dataPoint)
+        {
+            throw new NotImplementedException("Save file not implemented");
+        }
+
+        internal void DoFinalProcessing(bool? isChecked1, bool? isChecked2, string outputDirectoryPath)
+        {
+            throw new NotImplementedException();
         }
     }
 }

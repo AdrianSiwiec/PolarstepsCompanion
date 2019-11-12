@@ -24,13 +24,20 @@ namespace PolarstepsCompanion
 
             public string ImagePreviewFilename { get => imagePreviewFilename; set => imagePreviewFilename = value; }
             public string ImagePreviewPath { get => imagePreviewPath; set => imagePreviewPath = value; }
-            public DateTime? ImagePreviewDateTaken
+            public String ImagePreviewDateTaken
             {
-                get => imagePreviewDateTaken; set
+                get
                 {
-                    imagePreviewDateTaken = value;
-                    mainWindow.RaisePropertyChanged("ImagePreviewDateTaken");
-                    mainWindow.RaisePropertyChanged("ImagePreviewDateFixed");
+                    if (imagePreviewDateTaken != null)
+                        return imagePreviewDateTaken.ToString();
+                    else
+                        return "Date/Time not available";
+                }
+
+                private set
+                {
+                    //imagePreviewDateTaken = value;
+                    
                 }
             }
 
@@ -39,9 +46,9 @@ namespace PolarstepsCompanion
                 get
                 {
                     if (mainWindow == null || mainWindow.FixTimeTimeSpan == null)
-                        return ImagePreviewDateTaken;
+                        return imagePreviewDateTaken;
 
-                    return ImagePreviewDateTaken + mainWindow.FixTimeTimeSpan;
+                    return imagePreviewDateTaken + mainWindow.FixTimeTimeSpan;
                 }
             }
 
@@ -54,9 +61,10 @@ namespace PolarstepsCompanion
                     {
                         TimeSpan t = ImagePreviewDateFixed.Value - EpochStart;
                         DataPoint dp = mainWindow.polarstepsProcessor.GetLocation(Convert.ToInt32(t.TotalSeconds));
-                        return $"https://www.google.com/maps/search/?api=1&map_action=map&query={dp.Lat},{dp.Lon}";
+                        return $"https://www.openstreetmap.org/?mlat={dp.Lat}&mlon={dp.Lon}#map=12";
                     }
-                    return "https://www.google.com";
+                    else
+                        return "";
                 }
             }
 
@@ -64,14 +72,19 @@ namespace PolarstepsCompanion
             {
                 get
                 {
-                    return "Click";
+                    if (String.IsNullOrWhiteSpace(LocationMapsLink))
+                        return "Not available";
+                    else
+                        return "Click";
                 }
             }
 
 
             internal void Preprocess()
             {
-                ImagePreviewDateTaken = PhotoProcessor.GetPhotoDateTaken(ImagePreviewPath);
+                imagePreviewDateTaken = PhotoProcessor.GetPhotoDateTaken(ImagePreviewPath);
+                mainWindow.RaisePropertyChanged("ImagePreviewDateTaken");
+                mainWindow.RaisePropertyChanged("ImagePreviewDateFixed");
             }
         }
     }
