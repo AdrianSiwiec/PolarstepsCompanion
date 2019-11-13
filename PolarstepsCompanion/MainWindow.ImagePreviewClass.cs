@@ -86,6 +86,11 @@ namespace PolarstepsCompanion
                 mainWindow.RaisePropertyChanged("ImagePreviewDateTaken");
                 mainWindow.RaisePropertyChanged("ImagePreviewDateFixed");
             }
+
+            internal void FinalProcess(bool renamePhotos, bool overwritePhotos, bool overwriteLocation, TimeSpan? timeSpanToShift, string outputDirectoryPath)
+            {
+                //Remember the one hour rule
+            }
         }
     }
 }

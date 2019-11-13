@@ -38,6 +38,7 @@ namespace PolarstepsCompanion
             Messenger.Default.Register<String>(this, (action) => ReceiveMessage(action));
             this.DataContext = this;
             this.PolarstepsCBItems = new ObservableCollection<ComboBoxItem>();
+            UpdateFinalProcessingReadyStatus();
         }
 
         private void ReceiveMessage(string message)
@@ -72,6 +73,7 @@ namespace PolarstepsCompanion
                     TextBlockContent += "\n";
                 }
 
+                UpdateFinalProcessingReadyStatus();
             }
             // For future use
             //CommonOpenFileDialog common = new CommonOpenFileDialog();
@@ -126,9 +128,11 @@ namespace PolarstepsCompanion
 
                 PhotosLoadedInfo.Text = $"{photoProcessor.Images.Count} photos loaded succesfully.";
                 RaisePropertyChanged("PhotosLoadedInfo");
+
+                UpdateFinalProcessingReadyStatus();
+                ValidateOutputDirectory();
             }
 
-            ValidateOutputDirectory();
         }
 
         private void ImagePreviewDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -289,7 +293,7 @@ namespace PolarstepsCompanion
 
                 RaisePropertyChanged("FixTimePhotosGrid");
                 RaisePropertyChanged("FixTimeManualGrid");
-
+                UpdateFinalProcessingReadyStatus();
             }
         }
 
@@ -400,6 +404,7 @@ namespace PolarstepsCompanion
                     FixTimeTimeSpanMessage = "";
 
                 PreviewDataGrid?.Items?.Refresh();
+                UpdateFinalProcessingReadyStatus();
             }
         }
 
@@ -489,6 +494,8 @@ namespace PolarstepsCompanion
                     PolarstepsCBItems.Add(new ComboBoxItem { Content = new PolarstepsTrip(trip) });
                 }
                 PolarstepsCBIsEnabled = true;
+
+                UpdateFinalProcessingReadyStatus();
             }
         }
 
@@ -502,6 +509,7 @@ namespace PolarstepsCompanion
                 PolarstepsIsTripSelected = polarstepsProcessor.SelectedTrip != null;
 
                 polarstepsProcessor.Process();
+                UpdateFinalProcessingReadyStatus();
             }
         }
 
@@ -529,6 +537,8 @@ namespace PolarstepsCompanion
             }
         }
 
+        public bool FinalProcessingStarted { get; private set; }
+
         private void OutputDirectoryButton_Click(object sender, RoutedEventArgs e)
         {
             using CommonOpenFileDialog fileDialog = new CommonOpenFileDialog
@@ -544,6 +554,7 @@ namespace PolarstepsCompanion
                 OutputIsDirectoryValid = true;
 
                 ValidateOutputDirectory();
+                UpdateFinalProcessingReadyStatus();
             }
 
         }
@@ -565,6 +576,8 @@ namespace PolarstepsCompanion
                 OutputRename = true;
             else
                 OutputRename = false;
+
+            UpdateFinalProcessingReadyStatus();
         }
 
         private bool OutputOverwrite = false;
@@ -583,24 +596,103 @@ namespace PolarstepsCompanion
                 else
                     OutputDirectoryGrid.Visibility = Visibility.Visible;
             }
+
+            UpdateFinalProcessingReadyStatus();
+        }
+
+        internal void UpdateFinalProcessingReadyStatus()
+        {
+            if (FinalProcessingStarted)
+            {
+                StartProcessingButton.IsEnabled = false;
+
+                return;
+            }
+
+            if (FinalProcessingProgressBarText == null)
+                return;
+
+            if (photoProcessor == null)
+            {
+                FinalProcessingSummaryText.Text = "Please select photos to process.";
+                StartProcessingButton.IsEnabled = false;
+
+                return;
+            }
+
+            if (!photoProcessor.IsPreprocessingDone)
+            {
+                FinalProcessingSummaryText.Text = "Please wait for preprocessing to finish.";
+                StartProcessingButton.IsEnabled = false;
+
+                return;
+            }
+
+            bool isGoodToGo = false;
+            StringBuilder sb = new StringBuilder();
+
+            if (FixTimeTimeSpan.HasValue && FixTimeTimeSpan.Value != TimeSpan.Zero)
+            {
+                sb.Append("Time of your photos will be fixed. ");
+                isGoodToGo = true;
+            }
+
+            if (polarstepsProcessor?.IsTripProcessed == true)
+            {
+                sb.Append("Polarsteps-based location will be added to your photos. ");
+                isGoodToGo = true;
+
+                if (PolarstepsOverwiteLocationYes.IsChecked == true)
+                {
+                    sb.Append("It will be overwritten, if it already exists. ");
+                }
+            }
+
+            if (OutputRenameYes.IsChecked == true)
+            {
+                sb.Append("Your photos will be renamed. ");
+                isGoodToGo = true;
+            }
+
+            if (OutputOverwriteNo.IsChecked == true)
+            {
+                if (OutputIsDirectoryValid)
+                {
+                    sb.Append("Your photos will be copied to a new directory. ");
+                }
+                else
+                {
+                    FinalProcessingSummaryText.Text = "Please, select a proper output directory.";
+                    StartProcessingButton.IsEnabled = false;
+
+                    return;
+                }
+            }
+            else
+            {
+                sb.Append("Your photos will be modified.");
+            }
+
+            if (!isGoodToGo)
+            {
+                FinalProcessingSummaryText.Text = "Nothing to be done!";
+                StartProcessingButton.IsEnabled = false;
+            }
+            else
+            {
+                FinalProcessingSummaryText.Text = sb.ToString();
+                StartProcessingButton.IsEnabled = true;
+            }
         }
 
         private void StartProcessing_Click(object sender, RoutedEventArgs e)
         {
-            if((polarstepsProcessor!= null && !polarstepsProcessor.IsTripProcessed) || !photoProcessor.IsPreprocessingDone)
-            {
-                FinalProcessingProgressBarText.Text = "Preprocessing is not done yet. Try again when it is finished.";
+            FinalProcessingSummaryGrid.Visibility = Visibility.Hidden;
+            FinalProcessingBarGrid.Visibility = Visibility.Visible;
+            FinalProcessingStarted = true;
+            UpdateFinalProcessingReadyStatus();
 
-                return;
-            }
-
-            if(OutputOverwriteYes.IsChecked != true && !OutputIsDirectoryValid)
-            {
-                FinalProcessingProgressBarText.Text = "To Continue, Select a valid output directory.";
-                return;
-            }
-
-            photoProcessor.DoFinalProcessing(OutputRenameYes.IsChecked, OutputOverwriteYes.IsChecked, OutputDirectoryPath);
+            photoProcessor.DoFinalProcessing(OutputRenameYes.IsChecked, OutputOverwriteYes.IsChecked, PolarstepsOverwiteLocationYes.IsChecked, FixTimeTimeSpan, OutputDirectoryPath);
         }
 
         private void DG_Hyperlink_Click(object sender, RoutedEventArgs e)
@@ -614,5 +706,11 @@ namespace PolarstepsCompanion
                 browserWindow.Show();
             }
         }
+
+        private void PolarstepsOverwiteLocation_Checked(object sender, RoutedEventArgs e)
+        {
+            UpdateFinalProcessingReadyStatus();
+        }
+
     }
 }

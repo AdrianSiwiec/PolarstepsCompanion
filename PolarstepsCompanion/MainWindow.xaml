@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PolarstepsCompanion"
         mc:Ignorable="d"
-        Title="Polarsteps Companion App" Height="450" Width="850"
+        Title="Polarsteps Companion App" Height="600" Width="1200"
     xmlns:System="clr-namespace:System;assembly=System.Runtime"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit">
     <Window.Resources>
@@ -91,8 +91,8 @@
         </TabItem>
         <TabItem Header="3. Select Polarsteps directory">
             <Grid Background="#FFFFFF">
-                <TextBlock Margin="10,10,10,0" Text=" Select a directory containing your Polarsteps data. You can download your data from Polarsteps website. &#x0a; To download the data, log into your Polarsteps account on a PC, then go to Options, Account Settings, Download My Data. &#x0a; Extract the archive to a new directory then select this directory below. &#x0a; It should contain directories named 'trip' and 'user'."  TextWrapping="Wrap" VerticalAlignment="Top" Height="75" Background="#FFD6D6D6"/>
-                <Grid Margin="0,90,0,0">
+                <TextBlock Margin="10,10,10,0" Text=" Select a directory containing your Polarsteps data. You can download your data from Polarsteps website. &#x0a; To download the data, log into your Polarsteps account on a PC, then go to Options, Account Settings, Download My Data. &#x0a; Extract the archive to a new directory then select this directory below. &#x0a; It should contain directories named 'trip' and 'user'. &#x0a; If your photos don't have a Date/Time metadata or are taken more than an hour before the start or after the end of the trip, location will not be added."  TextWrapping="Wrap" VerticalAlignment="Top" Height="81" Background="#FFD6D6D6"/>
+                <Grid Margin="0,110,0,0">
                     <TextBlock Text="Load Polarsteps directory" TextWrapping="Wrap" Width="138" VerticalAlignment="Top" Margin="10,10,0,0" HorizontalAlignment="Left"/>
                     <TextBlock Text="Select trip to process" TextWrapping="Wrap" Width="138" IsEnabled="{Binding PolarstepsCBIsEnabled}" VerticalAlignment="Top" Margin="10,44,0,0" HorizontalAlignment="Left"/>
                     <Button Content="Browse" Click="Button_Click_Polarsteps_Dir" Height="23" Width="74" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="184,6,0,0"/>
@@ -100,6 +100,10 @@
                     <CheckBox Content="" Width="20" IsEnabled="False" IsChecked="{Binding PolarstepsIsTripSelected}" VerticalAlignment="Top" Margin="159,44,0,0" HorizontalAlignment="Left"/>
                     <ComboBox ItemsSource="{Binding PolarstepsCBItems}" SelectedItem="{Binding PolarstepsCBSelectedItem}" IsEnabled="{Binding PolarstepsCBIsEnabled}" SelectionChanged="ComboBox_SelectionChanged" Margin="184,40,0,0" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" Width="182"/>
                     <TextBlock Margin="262,10,10,0" Text="{Binding PolarstepsDirectoryPath}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                    <TextBlock Text="Would you like to overwrite the location of photos that already have one?" Height="19" VerticalAlignment="Top" Margin="10,78,0,0" HorizontalAlignment="Left" Width="408" />
+                    <TextBlock Background="#FFD6D6D6" Text=" It is recommended to only use this option to fix location calculated inproperly using this app. &#x0a; If selected directory contains photos with proper locations (e.g. from a phone) a location calculated by this app will usually be less precise." Height="35" VerticalAlignment="Top" Margin="20,98,0,0" HorizontalAlignment="Left" Width="744" />
+                    <RadioButton IsChecked="True" x:Name="PolarstepsOverwiteLocationNo" Content="No" HorizontalAlignment="Left" Margin="418,79,0,0" VerticalAlignment="Top" Checked="PolarstepsOverwiteLocation_Checked"/>
+                    <RadioButton x:Name="PolarstepsOverwiteLocationYes" Content="Yes" HorizontalAlignment="Left" Margin="458,79,0,0" VerticalAlignment="Top" Checked="PolarstepsOverwiteLocation_Checked"/>
                 </Grid>
             </Grid>
         </TabItem>
@@ -151,9 +155,12 @@
 
                 <Grid Margin="10,0,10,10" VerticalAlignment="Bottom">
                     <Button x:Name="StartProcessingButton" Content="Go!" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="60" Click="StartProcessing_Click"/>
-                    <Grid  Margin="65,0,0,0">
+                    <Grid x:Name="FinalProcessingSummaryGrid" Margin="65,0,0,0">
+                        <TextBlock x:Name="FinalProcessingSummaryText" Text="aaa" HorizontalAlignment="Left" Margin="0,2,0,0"/>
+                    </Grid>
+                    <Grid x:Name="FinalProcessingBarGrid" Margin="65,0,0,0" Visibility="Hidden">
                         <ProgressBar x:Name="FinalProcessingProgressBar"  />
-                        <TextBlock x:Name="FinalProcessingProgressBarText" Text="" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="FinalProcessingProgressBarText" Text="" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                     </Grid>
                 </Grid>
             </Grid>

@@ -17,8 +17,14 @@ namespace PolarstepsCompanion
 
         private ObservableCollection<MainWindow.ImagePreviewClass> images;
         private BackgroundWorker preprocessingBackgroundWorker;
-        private BackgroundWorker finalBackgroundWorker;
         private MainWindow mainWindow;
+
+        private BackgroundWorker finalBackgroundWorker;
+        private bool renamePhotos;
+        private bool overwritePhotos;
+        private bool overwriteLocation;
+        private TimeSpan? timeSpanToShift;
+        private string outputDirectoryPath;
 
         public PhotoProcessor(string directory, MainWindow mainWindow)
         {
@@ -45,20 +51,7 @@ namespace PolarstepsCompanion
             finalBackgroundWorker.RunWorkerCompleted += FinalBackgroundWorker_RunWorkerCompleted;
         }
 
-        private void FinalBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void FinalBackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void FinalBackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
+        
 
         private void PreprocessingBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
@@ -71,11 +64,11 @@ namespace PolarstepsCompanion
             mainWindow.SelectPhotosDir.IsEnabled = true;
 
             IsPreprocessingDone = true;
+            mainWindow.UpdateFinalProcessingReadyStatus();
         }
 
         private void PreprocessingBackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            Trace.WriteLine("Progress: " + e.ProgressPercentage);
             mainWindow.PhotosLoadedPreprocessingBar.Value = e.ProgressPercentage;
             mainWindow.PhotosLoadedPreprocessingText.Text = e.ProgressPercentage + "%";
         }
@@ -89,7 +82,6 @@ namespace PolarstepsCompanion
                     images[i].Preprocess();
                     preprocessingBackgroundWorker.ReportProgress(((i * 100 + 1)) / images.Count);
                 }
-
             }
         }
 
@@ -97,6 +89,7 @@ namespace PolarstepsCompanion
         public bool IsPreprocessingDone { get => isPreprocessingDone; private set => isPreprocessingDone = value; }
 
         private bool isPreprocessingDone = false;
+        
 
         public static DateTime? GetPhotoDateTaken(string path)
         {
@@ -108,17 +101,46 @@ namespace PolarstepsCompanion
             ImageFile file = ImageFile.FromFile(path);
             ExifDateTime dateTime = file.Properties.Get<ExifDateTime>(ExifTag.DateTime);
 
-            return dateTime;
+            if (dateTime == null)
+                return null;
+            else
+                return dateTime.Value;
         }
 
-        public static void SaveFile(string inputDir, string inputFilename, bool changeName, bool overwrite, string outputDir, DataPoint dataPoint)
+        internal void DoFinalProcessing(bool? renamePhotos, bool? overwritePhotos, bool? overwriteLocation, TimeSpan? timeSpanToShift, string outputDirectoryPath)
         {
-            throw new NotImplementedException("Save file not implemented");
+            this.renamePhotos = renamePhotos == true;
+            this.overwritePhotos = overwritePhotos == true;
+            this.overwriteLocation = overwriteLocation == true;
+            this.timeSpanToShift = timeSpanToShift;
+            this.outputDirectoryPath = outputDirectoryPath;
+
+            finalBackgroundWorker.RunWorkerAsync();
         }
 
-        internal void DoFinalProcessing(bool? isChecked1, bool? isChecked2, string outputDirectoryPath)
+        private void FinalBackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            throw new NotImplementedException();
+            if(images != null)
+            {
+                for (int i = 0; i < images.Count; i++)
+                {
+                    images[i].FinalProcess(renamePhotos, overwritePhotos, overwriteLocation, timeSpanToShift, outputDirectoryPath);
+                    finalBackgroundWorker.ReportProgress(((i * 100 + 1)) / images.Count);
+                }
+            }
         }
+
+        private void FinalBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            mainWindow.FinalProcessingProgressBar.Value = 100;
+            mainWindow.FinalProcessingProgressBarText.Text = "All Done!";
+        }
+
+        private void FinalBackgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            mainWindow.FinalProcessingProgressBar.Value = e.ProgressPercentage;
+            mainWindow.FinalProcessingProgressBarText.Text = e.ProgressPercentage + "%";
+        }
+
     }
 }
