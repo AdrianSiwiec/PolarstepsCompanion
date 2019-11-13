@@ -1,4 +1,5 @@
-﻿using GalaSoft.MvvmLight.Messaging;
+﻿using ExifLibrary;
+using GalaSoft.MvvmLight.Messaging;
 using MetadataExtractor;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
@@ -63,6 +64,15 @@ namespace PolarstepsCompanion
                 IEnumerable<MetadataExtractor.Directory> directories = ImageMetadataReader.ReadMetadata(fileDialog.FileName);
 
                 TextBlockContent = "";
+
+                ImageFile imageFile = ImageFile.FromFile(fileDialog.FileName);
+                TextBlockContent += imageFile.Properties.Get(ExifTag.GPSLongitude) + "\n";
+                TextBlockContent += imageFile.Properties.Get(ExifTag.GPSLongitudeRef) + "\n";
+                TextBlockContent += imageFile.Properties.Get(ExifTag.GPSLatitude) + "\n";
+                TextBlockContent += imageFile.Properties.Get(ExifTag.GPSLatitudeRef) + "\n";
+
+
+
                 foreach (Directory directory in directories)
                 {
                     foreach (Tag tag in directory.Tags)
@@ -241,7 +251,7 @@ namespace PolarstepsCompanion
             {
                 FixTimeCameraPhotoPath = fileDialog.FileName;
                 FixTimeCameraFilename = System.IO.Path.GetFileName(fileDialog.FileName);
-                FixTimeCameraDateTaken = PhotoProcessor.GetPhotoDateTaken(fileDialog.FileName);
+                FixTimeCameraDateTaken = ImageClass.GetPhotoDateTaken(fileDialog.FileName);
                 UpdateTimeSpanCamera();
             }
         }
@@ -256,7 +266,7 @@ namespace PolarstepsCompanion
             {
                 FixTimePhotoPhotoPath = fileDialog.FileName;
                 FixTimePhotoFilename = System.IO.Path.GetFileName(fileDialog.FileName);
-                FixTimePhotoDateTaken = PhotoProcessor.GetPhotoDateTaken(fileDialog.FileName);
+                FixTimePhotoDateTaken = ImageClass.GetPhotoDateTaken(fileDialog.FileName);
                 UpdateTimeSpanCamera();
             }
         }
@@ -371,7 +381,7 @@ namespace PolarstepsCompanion
             {
                 FixTimeManualPhotoPath = fileDialog.FileName;
                 FixTimeManualFilename = System.IO.Path.GetFileName(fileDialog.FileName);
-                FixTimeManualDateTaken = PhotoProcessor.GetPhotoDateTaken(fileDialog.FileName);
+                FixTimeManualDateTaken = ImageClass.GetPhotoDateTaken(fileDialog.FileName);
 
                 FixTimeManualDateTime.Value = FixTimeManualDateTaken;
 
@@ -684,9 +694,10 @@ namespace PolarstepsCompanion
                 StartProcessingButton.IsEnabled = true;
             }
         }
-
+        
         private void StartProcessing_Click(object sender, RoutedEventArgs e)
         {
+
             FinalProcessingSummaryGrid.Visibility = Visibility.Hidden;
             FinalProcessingBarGrid.Visibility = Visibility.Visible;
             FinalProcessingStarted = true;

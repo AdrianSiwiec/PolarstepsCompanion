@@ -115,12 +115,12 @@
                     <RadioButton x:Name="OutputRenameNo" Content="No" IsChecked="True" HorizontalAlignment="Left" Margin="218,53,0,0" VerticalAlignment="Top" Checked="OutputRename_Checked"/>
                     <RadioButton x:Name="OutputRenameYes" Content="Yes" HorizontalAlignment="Left" Margin="258,53,0,0" VerticalAlignment="Top" Checked="OutputRename_Checked"/>
                 </Grid>
-                <Grid>
+                <Grid Visibility="Hidden"> <!--For now it's hidden because overwriting is hard to handle-->
                     <TextBlock HorizontalAlignment="Left" Margin="10,72,0,0" Text="Would you like to overwrite the photos or save a copy?" TextWrapping="Wrap" VerticalAlignment="Top"/>
-                    <RadioButton x:Name="OutputOverwriteNo" Content="Make a copy (slower)" HorizontalAlignment="Left" Margin="393,73,0,0" VerticalAlignment="Top" Checked="OutputOverwrite_Checked"/>
-                    <RadioButton x:Name="OutputOverwriteYes" Content="Overwrite" HorizontalAlignment="Left" Margin="318,73,0,0" VerticalAlignment="Top" IsChecked="True" Checked="OutputOverwrite_Checked"/>
+                    <RadioButton IsChecked="True" x:Name="OutputOverwriteNo" Content="Make a copy (slower)" HorizontalAlignment="Left" Margin="393,73,0,0" VerticalAlignment="Top" Checked="OutputOverwrite_Checked"/>
+                    <RadioButton x:Name="OutputOverwriteYes" Content="Overwrite" HorizontalAlignment="Left" Margin="318,73,0,0" VerticalAlignment="Top" IsChecked="False" Checked="OutputOverwrite_Checked"/>
                 </Grid>
-                <Grid x:Name="OutputDirectoryGrid" Margin="10,72,0,0" Height="48" VerticalAlignment="Top" Visibility="Hidden">
+                <Grid x:Name="OutputDirectoryGrid" Margin="10,72,0,0" Height="48" VerticalAlignment="Top" Visibility="Visible">
                     <TextBlock HorizontalAlignment="Left" Margin="10,20,0,0" Text="Select output directory." TextWrapping="Wrap" VerticalAlignment="Top" Width="136"/>
                     <Button x:Name="OutputDirectoryButton" Content="Browse" HorizontalAlignment="Left" Margin="180,18,0,0" VerticalAlignment="Top" Width="71" Click="OutputDirectoryButton_Click"/>
                     <TextBlock Margin="256,20,10,0" Text="{Binding OutputDirectoryPath}" TextWrapping="Wrap" VerticalAlignment="Top"/>

@@ -15,7 +15,7 @@ namespace PolarstepsCompanion
         private const string EXIF_IFD0_DIR = "Exif IFD0";
         static private string[] PhotoExtensions = { ".JPG", ".JPEG", ".NEF" };
 
-        private ObservableCollection<MainWindow.ImagePreviewClass> images;
+        private ObservableCollection<MainWindow.ImageClass> images;
         private BackgroundWorker preprocessingBackgroundWorker;
         private MainWindow mainWindow;
 
@@ -29,14 +29,14 @@ namespace PolarstepsCompanion
         public PhotoProcessor(string directory, MainWindow mainWindow)
         {
             this.mainWindow = mainWindow;
-            Images = new ObservableCollection<MainWindow.ImagePreviewClass>();
+            Images = new ObservableCollection<MainWindow.ImageClass>();
 
             IEnumerable<string> imagePaths = System.IO.Directory.EnumerateFiles(directory, "*", System.IO.SearchOption.AllDirectories).
                     Where(f => PhotoExtensions.Contains(System.IO.Path.GetExtension(f), StringComparer.InvariantCultureIgnoreCase));
 
             foreach (string image in imagePaths)
             {
-                Images.Add(new MainWindow.ImagePreviewClass(directory, image, mainWindow));
+                Images.Add(new MainWindow.ImageClass(directory, image, mainWindow));
             }
 
             preprocessingBackgroundWorker = new BackgroundWorker { WorkerReportsProgress = true };
@@ -85,27 +85,13 @@ namespace PolarstepsCompanion
             }
         }
 
-        public ObservableCollection<MainWindow.ImagePreviewClass> Images { get => images; set => images = value; }
+        public ObservableCollection<MainWindow.ImageClass> Images { get => images; set => images = value; }
         public bool IsPreprocessingDone { get => isPreprocessingDone; private set => isPreprocessingDone = value; }
 
         private bool isPreprocessingDone = false;
         
 
-        public static DateTime? GetPhotoDateTaken(string path)
-        {
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                throw new ArgumentException("Bad photo path.", nameof(path));
-            }
-
-            ImageFile file = ImageFile.FromFile(path);
-            ExifDateTime dateTime = file.Properties.Get<ExifDateTime>(ExifTag.DateTime);
-
-            if (dateTime == null)
-                return null;
-            else
-                return dateTime.Value;
-        }
+        
 
         internal void DoFinalProcessing(bool? renamePhotos, bool? overwritePhotos, bool? overwriteLocation, TimeSpan? timeSpanToShift, string outputDirectoryPath)
         {

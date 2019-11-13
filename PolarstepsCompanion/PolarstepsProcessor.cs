@@ -77,8 +77,15 @@ namespace PolarstepsCompanion
         }
 
         //Not terribly accurate - should be average on a globe, not just average of coordinates. Should do for now.
-        public DataPoint GetLocation(int time)
+        public DataPoint? GetLocation(int time)
         {
+            //Outside of trip range by more than hour - do not provice location.
+            if (time + TimeSpan.FromMinutes(60).TotalSeconds < sortedDataPoints[0].Time ||
+               time - TimeSpan.FromMinutes(60).TotalSeconds > sortedDataPoints[sortedDataPoints.Count - 1].Time)
+            {
+                return null;
+            }
+
             int index = sortedDataPoints.BinarySearch(new DataPoint(time, 0, 0));
 
             if (index >= 0)
@@ -137,7 +144,7 @@ namespace PolarstepsCompanion
             get;
             private set;
         }
-        
+
         public PolarstepsProcessor(string polarstepsMainDir)
         {
             this.polarstepsMainDir = polarstepsMainDir;
@@ -193,14 +200,9 @@ namespace PolarstepsCompanion
 
             locationsProcessor = new LocationsProcessor(locationsClass.Locations);
             IsTripProcessed = locationsProcessor != null;
-
-            Trace.WriteLine(locationsProcessor.GetLocation(1569671980).Lat);
-            Trace.WriteLine(locationsProcessor.GetLocation(1569671990).Lat);
-            Trace.WriteLine(locationsProcessor.GetLocation(1869671990).Lat);
-            Trace.WriteLine(locationsProcessor.GetLocation(0).Lat);
         }
 
-        public DataPoint GetLocation(int time)
+        public DataPoint? GetLocation(int time)
         {
             return locationsProcessor?.GetLocation(time);
         }
