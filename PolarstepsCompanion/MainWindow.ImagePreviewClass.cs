@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace PolarstepsCompanion
 {
@@ -18,14 +19,14 @@ namespace PolarstepsCompanion
 
             public ImageClass(string rootDir, string path, MainWindow mainWindow)
             {
-                this.ImagePreviewFilename = path.Substring(rootDir.Length + 1);
-                this.ImagePreviewPath = path;
+                this.ImagePreviewRelativePath = path.Substring(rootDir.Length + 1);
+                this.ImagePreviewFullPath = path;
                 this.mainWindow = mainWindow;
                 //this.metadataDirectories = ImageMetadataReader.ReadMetadata(path);
             }
 
-            public string ImagePreviewFilename { get => imagePreviewFilename; set => imagePreviewFilename = value; }
-            public string ImagePreviewPath { get => imagePreviewPath; set => imagePreviewPath = value; }
+            public string ImagePreviewRelativePath { get => imagePreviewFilename; set => imagePreviewFilename = value; }
+            public string ImagePreviewFullPath { get => imagePreviewPath; set => imagePreviewPath = value; }
             public String ImagePreviewDateTaken
             {
                 get
@@ -99,74 +100,102 @@ namespace PolarstepsCompanion
 
 
 
-            internal void Preprocess()
+            internal async Task Preprocess()
             {
-                imagePreviewDateTaken = GetPhotoDateTaken(ImagePreviewPath);
+                imagePreviewDateTaken = await GetPhotoDateTaken(ImagePreviewFullPath);
                 mainWindow.RaisePropertyChanged("ImagePreviewDateTaken");
                 mainWindow.RaisePropertyChanged("ImagePreviewDateFixed");
             }
 
-            internal void FinalProcess(bool renamePhotos, bool overwritePhotos, bool overwriteLocation, TimeSpan? timeSpanToShift, string outputDirectoryPath)
+            internal async Task FinalProcess(bool renamePhotos, bool overwritePhotos, bool overwriteLocation, TimeSpan? timeSpanToShift, string outputDirectoryPath)
             {
-                //try
-                //{
-                string dirToSave = "";
-                if (overwritePhotos)
-                    dirToSave = ImagePreviewPath.Substring(0, ImagePreviewPath.Length - ImagePreviewFilename.Length - 1);
-                else
+                try
                 {
-                    dirToSave = outputDirectoryPath;
-                    System.IO.Directory.CreateDirectory(dirToSave);
-                }
-
-                ImageFile imageFile = ImageFile.FromFile(ImagePreviewPath);
-
-                string filenameToSave = "";
-                if (renamePhotos)
-                    filenameToSave = GetFilenamePrefix(imageFile) + ImagePreviewFilename;
-                else
-                    filenameToSave = ImagePreviewFilename;
-
-
-                DataPoint location = ImageLocation;
-                if (location != null && (overwriteLocation || !imageFile.Properties.Contains(ExifTag.GPSLatitude)))
-                {
-                    //imageFile.Properties.Set(ExifTag.GPSLatitude, new GPSLatitudeLongitude(ExifTag.GPSLatitude,
-                    //new[] { new MathEx.UFraction32(Math.Abs(location.Lat)), new MathEx.UFraction32(0), new MathEx.UFraction32(0) }));
-                    imageFile.Properties.Set(ExifTag.GPSLatitude, Math.Abs(location.Lat));
-                    imageFile.Properties.Set(ExifTag.GPSLatitudeRef,
-                        location.Lat > 0 ? GPSLatitudeRef.North : GPSLatitudeRef.South);
-
-                    //imageFile.Properties.Set(ExifTag.GPSLongitude, new GPSLatitudeLongitude(ExifTag.GPSLongitude,
-                    //new[] { new MathEx.UFraction32(Math.Abs(location.Lon)), new MathEx.UFraction32(0), new MathEx.UFraction32(0) }));
-                    imageFile.Properties.Set(ExifTag.GPSLongitude, Math.Abs(location.Lon));
-                    imageFile.Properties.Set(ExifTag.GPSLongitudeRef,
-                        location.Lon > 0 ? GPSLongitudeRef.East : GPSLongitudeRef.West);
-
-                    imageFile.Properties.Set(ExifTag.GPSDateStamp, ImagePreviewDateFixed);
-                    imageFile.Properties.Set(ExifTag.DateTime, ImagePreviewDateFixed);
-
-                    imageFile.Save(Path.Combine(dirToSave, filenameToSave));
-                }
-                else
-                {
+                    string dirToSave = "";
                     if (overwritePhotos)
+                        dirToSave = Path.GetDirectoryName(ImagePreviewFullPath);
+                    else
                     {
-                        File.Move(ImagePreviewPath, Path.Combine(dirToSave, filenameToSave));
+                        dirToSave = Path.GetDirectoryName(Path.Combine(outputDirectoryPath, ImagePreviewRelativePath));
+                    }
+
+                    ImageFile imageFile = await ImageFile.FromFileAsync(ImagePreviewFullPath);
+
+                    string filenameToSave = ImagePreviewRelativePath.Substring(Path.GetDirectoryName(ImagePreviewRelativePath).Length + 1);
+                    if (renamePhotos)
+                        filenameToSave = GetFilenamePrefix(imageFile) + filenameToSave;
+
+                    bool saveImage = false;
+                    if (timeSpanToShift != null)
+                    {
+                        imageFile.Properties.Set(ExifTag.DateTime, ImagePreviewDateFixed.Value);
+
+                        saveImage = true;
+                    }
+
+                    DataPoint location = ImageLocation;
+                    if (location != null && (overwriteLocation || !imageFile.Properties.Contains(ExifTag.GPSLatitude)))
+                    {
+                        float deg = 0, min = 0, sec = 0;
+                        GetDegMinSec(location.Lat, ref deg, ref min, ref sec);
+                        imageFile.Properties.Set(ExifTag.GPSLatitude, deg, min, sec);
+                        //imageFile.Properties.Set(ExifTag.GPSLatitude, Math.Abs(location.Lat));
+                        imageFile.Properties.Set(ExifTag.GPSLatitudeRef,
+                            location.Lat > 0 ? GPSLatitudeRef.North : GPSLatitudeRef.South);
+
+                        GetDegMinSec(location.Lon, ref deg, ref min, ref sec);
+                        imageFile.Properties.Set(ExifTag.GPSLongitude, deg, min, sec);
+                        //imageFile.Properties.Set(ExifTag.GPSLongitude, Math.Abs(location.Lon));
+                        imageFile.Properties.Set(ExifTag.GPSLongitudeRef,
+                            location.Lon > 0 ? GPSLongitudeRef.East : GPSLongitudeRef.West);
+
+                        imageFile.Properties.Set(ExifTag.GPSDateStamp, ImagePreviewDateFixed.Value);
+                        //imageFile.Properties.Set(ExifTag.GPSMeasureMode, "2");
+
+                        saveImage = true;
+                    }
+
+
+                    string pathToSave = Path.Combine(dirToSave, filenameToSave);
+                    string fullDirToSave = Path.GetDirectoryName(pathToSave);
+                    System.IO.Directory.CreateDirectory(fullDirToSave);
+
+                    if (saveImage)
+                    {
+                        await imageFile.SaveAsync(pathToSave);
                     }
                     else
                     {
-                        File.Copy(ImagePreviewPath, Path.Combine(dirToSave, filenameToSave));
+                        if (overwritePhotos)
+                        {
+                            await new Task(() => File.Move(ImagePreviewFullPath, pathToSave));
+                        }
+                        else
+                        {
+                            await new Task(() => File.Copy(ImagePreviewFullPath, pathToSave));
+                        }
                     }
                 }
-                //}
-                //catch (Exception e)
-                //{
-                //    System.Windows.MessageBox.Show($"Error saving file \"{ImagePreviewFilename}\"\n" + e.ToString());
-                //}
+                catch (Exception e)
+                {
+                    System.Windows.MessageBox.Show($"Error saving file \"{ImagePreviewRelativePath}\"\n" + e.ToString());
+                }
             }
 
+            private void GetDegMinSec(double lon_lat, ref float deg, ref float min, ref float sec)
+            {
+                lon_lat = Math.Abs(lon_lat);
 
+                deg = (int)lon_lat;
+                lon_lat -= deg;
+                lon_lat *= 60;
+
+                min = (int)lon_lat;
+                lon_lat -= min;
+                lon_lat *= 60;
+
+                sec = Convert.ToSingle(lon_lat);
+            }
 
             private string GetFilenamePrefix(ImageFile imageFile)
             {
@@ -178,17 +207,17 @@ namespace PolarstepsCompanion
                 if (dateTime == null || dateTime == DateTime.MinValue)
                     return "";
 
-                return dateTime.ToString("yyyyMMdd.HHmmss.");
+                return dateTime.ToString("yyyy-MM-dd;HH.mm.ss.");
             }
 
-            public static DateTime? GetPhotoDateTaken(string path)
+            public static async Task<DateTime?> GetPhotoDateTaken(string path)
             {
                 if (string.IsNullOrWhiteSpace(path))
                 {
                     throw new ArgumentException("Bad photo path.", nameof(path));
                 }
 
-                ImageFile file = ImageFile.FromFile(path);
+                ImageFile file = await ImageFile.FromFileAsync(path);
                 ExifDateTime dateTime = file.Properties.Get<ExifDateTime>(ExifTag.DateTime);
 
                 if (dateTime == null)

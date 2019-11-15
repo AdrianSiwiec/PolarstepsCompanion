@@ -29,7 +29,7 @@ namespace PolarstepsCompanion
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
 
-        static public readonly string PhotoExtensionsString = "Photos|*.jpg;*.jpeg;*.nef";
+        static public readonly string PhotoExtensionsString = "Photos|*.jpg;*.jpeg;";
 
         private PolarstepsProcessor polarstepsProcessor;
         private PhotoProcessor photoProcessor;
@@ -38,6 +38,14 @@ namespace PolarstepsCompanion
             InitializeComponent();
             Messenger.Default.Register<String>(this, (action) => ReceiveMessage(action));
             this.DataContext = this;
+
+            //ImageFile imageFile = ImageFile.FromFile("C:\\git\\PolarstepsCompanion\\testImages\\a.jpg");
+
+            //DataPoint location = new DataPoint(10000000, 60, 60);
+            //imageFile.Properties.Set(ExifTag.GPSLatitude, Convert.ToSingle(60.0), 0, 0);
+
+            //imageFile.Save("C:\\git\\PolarstepsCompanion\\testImages\\b.jpg");
+
             this.PolarstepsCBItems = new ObservableCollection<ComboBoxItem>();
             UpdateFinalProcessingReadyStatus();
         }
@@ -241,7 +249,7 @@ namespace PolarstepsCompanion
 
         private string fixTimePhotoDateTakenString;
 
-        private void FixTimeCameraBrowse_Click(object sender, RoutedEventArgs e)
+        private async void FixTimeCameraBrowse_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog
             {
@@ -251,12 +259,12 @@ namespace PolarstepsCompanion
             {
                 FixTimeCameraPhotoPath = fileDialog.FileName;
                 FixTimeCameraFilename = System.IO.Path.GetFileName(fileDialog.FileName);
-                FixTimeCameraDateTaken = ImageClass.GetPhotoDateTaken(fileDialog.FileName);
+                FixTimeCameraDateTaken = await ImageClass.GetPhotoDateTaken(fileDialog.FileName);
                 UpdateTimeSpanCamera();
             }
         }
 
-        private void FixTimePhotoBrowse_Click(object sender, RoutedEventArgs e)
+        private async void FixTimePhotoBrowse_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog
             {
@@ -266,7 +274,7 @@ namespace PolarstepsCompanion
             {
                 FixTimePhotoPhotoPath = fileDialog.FileName;
                 FixTimePhotoFilename = System.IO.Path.GetFileName(fileDialog.FileName);
-                FixTimePhotoDateTaken = ImageClass.GetPhotoDateTaken(fileDialog.FileName);
+                FixTimePhotoDateTaken = await ImageClass.GetPhotoDateTaken(fileDialog.FileName);
                 UpdateTimeSpanCamera();
             }
         }
@@ -371,7 +379,7 @@ namespace PolarstepsCompanion
 
         private string fixTimeManualDateTakenString;
 
-        private void FixTimeManualBrowse_Click(object sender, RoutedEventArgs e)
+        private async void FixTimeManualBrowse_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog
             {
@@ -381,7 +389,7 @@ namespace PolarstepsCompanion
             {
                 FixTimeManualPhotoPath = fileDialog.FileName;
                 FixTimeManualFilename = System.IO.Path.GetFileName(fileDialog.FileName);
-                FixTimeManualDateTaken = ImageClass.GetPhotoDateTaken(fileDialog.FileName);
+                FixTimeManualDateTaken = await ImageClass.GetPhotoDateTaken(fileDialog.FileName);
 
                 FixTimeManualDateTime.Value = FixTimeManualDateTaken;
 
@@ -694,7 +702,7 @@ namespace PolarstepsCompanion
                 StartProcessingButton.IsEnabled = true;
             }
         }
-        
+
         private void StartProcessing_Click(object sender, RoutedEventArgs e)
         {
 

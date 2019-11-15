@@ -7,13 +7,15 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace PolarstepsCompanion
 {
     public class PhotoProcessor
     {
         private const string EXIF_IFD0_DIR = "Exif IFD0";
-        static private string[] PhotoExtensions = { ".JPG", ".JPEG", ".NEF" };
+        static private string[] PhotoExtensions = { ".JPG", ".JPEG" };
 
         private ObservableCollection<MainWindow.ImageClass> images;
         private BackgroundWorker preprocessingBackgroundWorker;
@@ -51,7 +53,7 @@ namespace PolarstepsCompanion
             finalBackgroundWorker.RunWorkerCompleted += FinalBackgroundWorker_RunWorkerCompleted;
         }
 
-        
+
 
         private void PreprocessingBackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
@@ -77,10 +79,17 @@ namespace PolarstepsCompanion
         {
             if (images != null)
             {
+                Queue<Task> tasks = new Queue<Task>();
+                int counter = 0;
                 for (int i = 0; i < images.Count; i++)
                 {
-                    images[i].Preprocess();
-                    preprocessingBackgroundWorker.ReportProgress(((i * 100 + 1)) / images.Count);
+                    while (tasks.Count >= 5)
+                    {
+                        tasks.Dequeue().Wait();
+                        counter++;
+                        preprocessingBackgroundWorker.ReportProgress(((counter * 100 + 1)) / images.Count);
+                    }
+                    tasks.Enqueue(images[i].Preprocess());
                 }
             }
         }
@@ -89,9 +98,9 @@ namespace PolarstepsCompanion
         public bool IsPreprocessingDone { get => isPreprocessingDone; private set => isPreprocessingDone = value; }
 
         private bool isPreprocessingDone = false;
-        
 
-        
+
+
 
         internal void DoFinalProcessing(bool? renamePhotos, bool? overwritePhotos, bool? overwriteLocation, TimeSpan? timeSpanToShift, string outputDirectoryPath)
         {
@@ -106,12 +115,19 @@ namespace PolarstepsCompanion
 
         private void FinalBackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            if(images != null)
+            if (images != null)
             {
+                Queue<Task> tasks = new Queue<Task>();
+                int counter = 0;
                 for (int i = 0; i < images.Count; i++)
                 {
-                    images[i].FinalProcess(renamePhotos, overwritePhotos, overwriteLocation, timeSpanToShift, outputDirectoryPath);
-                    finalBackgroundWorker.ReportProgress(((i * 100 + 1)) / images.Count);
+                    while (tasks.Count >= 5)
+                    {
+                        tasks.Dequeue().Wait();
+                        counter++;
+                        finalBackgroundWorker.ReportProgress(((counter * 100 + 1)) / images.Count);
+                    }
+                    tasks.Enqueue(images[i].FinalProcess(renamePhotos, overwritePhotos, overwriteLocation, timeSpanToShift, outputDirectoryPath));
                 }
             }
         }
