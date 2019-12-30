@@ -3,6 +3,7 @@ using MetadataExtractor;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -218,13 +219,15 @@ namespace PolarstepsCompanion
                 }
 
                 ImageFile file = await ImageFile.FromFileAsync(path);
-                ExifDateTime dateTime = file.Properties.Get<ExifDateTime>(ExifTag.DateTime);
+                ExifDateTime dateTime = file.Properties.Get<ExifDateTime>(ExifTag.DateTimeOriginal);
+
+                if (dateTime == null || dateTime.Value <= DateTime.MinValue)
+                    dateTime = file.Properties.Get<ExifDateTime>(ExifTag.DateTime);
 
                 if (dateTime == null)
                     return null;
                 else
                     return dateTime.Value;
-
             }
         }
     }
