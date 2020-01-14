@@ -122,14 +122,16 @@ namespace PolarstepsCompanion
 
                     ImageFile imageFile = await ImageFile.FromFileAsync(ImagePreviewFullPath);
 
-                    string filenameToSave = ImagePreviewRelativePath.Substring(Path.GetDirectoryName(ImagePreviewRelativePath).Length + 1);
+                    string filenameToSave = Path.GetFileName(ImagePreviewRelativePath);
+
                     if (renamePhotos)
-                        filenameToSave = GetFilenamePrefix(imageFile) + filenameToSave;
+                        filenameToSave = GetFilenamePrefix(imageFile, ImagePreviewDateFixed) + filenameToSave;
 
                     bool saveImage = false;
                     if (timeSpanToShift != null)
                     {
                         imageFile.Properties.Set(ExifTag.DateTime, ImagePreviewDateFixed.Value);
+                        imageFile.Properties.Set(ExifTag.DateTimeOriginal, ImagePreviewDateFixed.Value);
 
                         saveImage = true;
                     }
@@ -169,11 +171,11 @@ namespace PolarstepsCompanion
                     {
                         if (overwritePhotos)
                         {
-                            await new Task(() => File.Move(ImagePreviewFullPath, pathToSave));
+                            File.Move(ImagePreviewFullPath, pathToSave);
                         }
                         else
                         {
-                            await new Task(() => File.Copy(ImagePreviewFullPath, pathToSave));
+                            File.Copy(ImagePreviewFullPath, pathToSave);
                         }
                     }
                 }
@@ -198,17 +200,13 @@ namespace PolarstepsCompanion
                 sec = Convert.ToSingle(lon_lat);
             }
 
-            private string GetFilenamePrefix(ImageFile imageFile)
+            private string GetFilenamePrefix(ImageFile imageFile, DateTime? imagePreviewDateFixed)
             {
-                ExifDateTime exifDateTime = (ExifDateTime)imageFile.Properties.Get(ExifTag.DateTime);
-                if (exifDateTime == null)
-                    return "";
-
-                DateTime dateTime = exifDateTime;
+                DateTime? dateTime = imagePreviewDateFixed;
                 if (dateTime == null || dateTime == DateTime.MinValue)
-                    return "";
+                    return "NA";
 
-                return dateTime.ToString("yyyy-MM-dd;HH.mm.ss.");
+                return dateTime.Value.ToString("yyyy-MM-dd;HH.mm.ss.");
             }
 
             public static async Task<DateTime?> GetPhotoDateTaken(string path)

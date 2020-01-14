@@ -110,7 +110,7 @@ namespace PolarstepsCompanion
 
             double proportion = (double)(time - d1.Time) / (d2.Time - d1.Time);
 
-            double lat = d2.Lat * (1 - proportion) + d2.Lat * proportion;
+            double lat = d1.Lat * (1 - proportion) + d2.Lat * proportion;
             double lon = d1.Lon * (1 - proportion) + d2.Lon * proportion;
 
             //Trace.WriteLine("Proportion: " + proportion);

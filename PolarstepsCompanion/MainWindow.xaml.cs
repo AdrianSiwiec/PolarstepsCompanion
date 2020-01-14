@@ -579,7 +579,7 @@ namespace PolarstepsCompanion
 
         private void ValidateOutputDirectory()
         {
-            if (OutputDirectoryPath != null && OutputDirectoryPath.Contains(PhotosPath, StringComparison.InvariantCultureIgnoreCase))
+            if (OutputDirectoryPath != null && (OutputDirectoryPath + "\\").Contains(PhotosPath + "\\" , StringComparison.InvariantCultureIgnoreCase))
             {
                 OutputDirectoryPath = "Output directory should be different to selected photos directory.";
                 OutputIsDirectoryValid = false;
