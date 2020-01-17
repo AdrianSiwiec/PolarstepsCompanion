@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Polarsteps Companion"
-#define MyAppVersion "1.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "Adrian Siwiec"
 #define MyAppURL "https://github.com/AdrianSiwiec/PolarstepsCompanion"
 #define MyAppExeName "PolarstepsCompanion.exe"

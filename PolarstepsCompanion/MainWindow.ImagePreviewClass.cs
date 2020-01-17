@@ -222,6 +222,10 @@ namespace PolarstepsCompanion
                 if (dateTime == null || dateTime.Value <= DateTime.MinValue)
                     dateTime = file.Properties.Get<ExifDateTime>(ExifTag.DateTime);
 
+                ExifDateTime dateTimeDigitized = file.Properties.Get<ExifDateTime>(ExifTag.DateTimeDigitized);
+                if(dateTime == null || ( dateTimeDigitized.Value > DateTime.MinValue && dateTimeDigitized.Value < dateTime.Value ) )
+                    dateTime = dateTimeDigitized;
+
                 if (dateTime == null)
                     return null;
                 else
